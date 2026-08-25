@@ -1,0 +1,55 @@
+/* 공통 유틸 — 토큰 기반 보조 스타일 */
+@layer utilities {
+  .font-display {
+    font-family: 'Outfit', 'Noto Sans KR', system-ui, sans-serif;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+  }
+
+  .text-gradient-brand {
+    background-image: linear-gradient(90deg, #1d6fe8 0%, #4da3ff 50%, #5bb8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .surface-glow {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 10px 32px rgba(29, 111, 232, 0.1),
+      0 2px 8px rgba(15, 40, 80, 0.04);
+  }
+
+  .dark .surface-glow {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 12px 36px rgba(0, 0, 0, 0.45);
+  }
+
+  .motion-pop {
+    transition:
+      transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.22s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .motion-pop:hover {
+    transform: translateY(-1px);
+  }
+
+  .motion-pop:active {
+    transform: translateY(0) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-pop,
+  .motion-pop:hover,
+  .motion-pop:active {
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,26 @@
+.dark {
+  --color-bg-page: #0a101a;
+  --color-bg-page-deep: #060b14;
+  --color-bg-surface: #121a28;
+  --color-bg-surface-soft: rgba(18, 26, 40, 0.92);
+  --color-bg-muted: rgba(255, 255, 255, 0.05);
+  --color-bg-accent-soft: rgba(29, 111, 232, 0.22);
+  --color-bg-warn-soft: rgba(196, 122, 18, 0.18);
+  --color-text-primary: #eef4fb;
+  --color-text-secondary: #9aadc4;
+  --color-text-muted: #6b7f98;
+  --color-text-inverse: #ffffff;
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+  --color-accent: #4d8fff;
+  --color-accent-ink: #8bb6ff;
+  --color-sky: #7ec8ff;
+  --color-warn: #e0a04a;
+  --color-danger: #f07178;
+  --color-phase-kickoff: #9ec0ff;
+  --color-phase-pre: #5b9bff;
+  --color-phase-during: #7ec8ff;
+  --color-phase-post: #38bdf8;
+  --color-progress: #4d8fff;
+  --shadow-surface: 0 1px 0 rgba(0, 0, 0, 0.25), 0 16px 40px rgba(0, 0, 0, 0.4);
+}

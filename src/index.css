@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+@import './styles/light-theme.css';
+@import './styles/dark-theme.css';
+@import './styles/theme-utilities.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-bg-page: var(--color-bg-page);
+  --color-bg-page-deep: var(--color-bg-page-deep);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-surface-soft: var(--color-bg-surface-soft);
+  --color-bg-muted: var(--color-bg-muted);
+  --color-bg-accent-soft: var(--color-bg-accent-soft);
+  --color-bg-warn-soft: var(--color-bg-warn-soft);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-border-default: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
+  --color-accent: var(--color-accent);
+  --color-accent-ink: var(--color-accent-ink);
+  --color-sky: var(--color-sky);
+  --color-warn: var(--color-warn);
+  --color-danger: var(--color-danger);
+  --color-phase-kickoff: var(--color-phase-kickoff);
+  --color-phase-pre: var(--color-phase-pre);
+  --color-phase-during: var(--color-phase-during);
+  --color-phase-post: var(--color-phase-post);
+  --color-progress: var(--color-progress);
+  --font-sans: 'Noto Sans KR', 'Outfit', system-ui, sans-serif;
+  --shadow-surface: var(--shadow-surface);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background:
+      radial-gradient(ellipse 70% 45% at 0% 0%, color-mix(in srgb, var(--color-sky) 28%, transparent), transparent 55%),
+      radial-gradient(ellipse 55% 40% at 100% 0%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, color-mix(in srgb, var(--color-sky) 12%, transparent), transparent 55%),
+      linear-gradient(180deg, var(--color-bg-page) 0%, var(--color-bg-page-deep) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.015em;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 28%, white);
+    color: var(--color-text-primary);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

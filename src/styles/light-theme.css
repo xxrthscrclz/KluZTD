@@ -1,0 +1,26 @@
+:root {
+  --color-bg-page: #f4f8fc;
+  --color-bg-page-deep: #e8f1fa;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-soft: rgba(255, 255, 255, 0.92);
+  --color-bg-muted: rgba(15, 40, 80, 0.04);
+  --color-bg-accent-soft: #e0efff;
+  --color-bg-warn-soft: #fff4e5;
+  --color-text-primary: #0b1220;
+  --color-text-secondary: #4a5d73;
+  --color-text-muted: #8090a5;
+  --color-text-inverse: #ffffff;
+  --color-border-default: rgba(15, 40, 80, 0.08);
+  --color-border-strong: rgba(15, 40, 80, 0.14);
+  --color-accent: #1d6fe8;
+  --color-accent-ink: #0f4fc4;
+  --color-sky: #5bb8ff;
+  --color-warn: #c47a12;
+  --color-danger: #d42b3f;
+  --color-phase-kickoff: #0b2a5b;
+  --color-phase-pre: #1d6fe8;
+  --color-phase-during: #3a9ef0;
+  --color-phase-post: #0ea5e9;
+  --color-progress: #1d6fe8;
+  --shadow-surface: 0 1px 0 rgba(255, 255, 255, 0.75) inset, 0 10px 32px rgba(29, 111, 232, 0.1), 0 2px 8px rgba(15, 40, 80, 0.04);
+}

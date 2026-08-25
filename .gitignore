@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+*.local
+package-lock.json
+.pnpm-store
+data/kluztd.json
