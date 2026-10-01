@@ -1,7 +1,8 @@
 import { CONTEXTS } from '@/constants/lists';
 import { useGtdStore } from '@/stores/gtdStore';
-import type { Item } from '@/types/gtd';
+import type { Item, Priority } from '@/types/gtd';
 import { daysFromTodayInput } from '@/utils/date';
+import { PRIORITY_LABEL } from '@/utils/priority';
 
 type Props = {
   item: Item;
@@ -41,6 +42,32 @@ export default function ItemDetail({ item }: Props) {
           placeholder="왜 하는지, 어떻게 할지 — 다음에 봤을 때 바로 이해되게"
           className={`${inputClass} resize-y leading-relaxed`}
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <div className={fieldLabel}>중요도</div>
+        <div className="flex flex-wrap gap-1.5">
+          {(['high', 'normal', 'low'] as Priority[]).map((priority) => {
+            const on = item.priority === priority;
+            return (
+              <button
+                key={priority}
+                type="button"
+                onClick={() => patch({ priority })}
+                className={`motion-pop rounded-full border px-2.5 py-1 text-xs font-bold ${
+                  on
+                    ? 'border-accent/35 bg-bg-accent-soft text-accent-ink'
+                    : 'border-border-default text-text-secondary hover:border-accent/30 hover:text-accent-ink'
+                }`}
+              >
+                {PRIORITY_LABEL[priority]}
+              </button>
+            );
+          })}
+        </div>
+        <div className="text-[0.7rem] font-medium text-text-muted">
+          «지금 할 일»은 마감 → 오늘 하기 → 중요 → 마감 임박 순으로 줄 세웁니다.
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">

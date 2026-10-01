@@ -79,6 +79,8 @@ export default function Sidebar() {
               type="button"
               onClick={() => setActiveListId(list.id)}
               className={`motion-pop flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-left ${
+                list.virtual ? 'mb-2' : ''
+              } ${
                 active
                   ? 'border-accent/30 bg-gradient-to-br from-bg-accent-soft to-white shadow-[0_8px_22px_rgba(29,111,232,0.14)] dark:to-bg-surface'
                   : 'border-transparent hover:border-sky/25 hover:bg-sky/10'

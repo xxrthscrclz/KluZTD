@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { loadKluZTDFile, saveKluZTDFile } from '@/api/kluztdData';
 import { DEFAULT_LIST_ID } from '@/constants/lists';
 import type { Item, ListId, Project } from '@/types/gtd';
+import { todayInput } from '@/utils/date';
 import { createEmptyItem, createEmptyProject } from '@/utils/item';
 
 export type KluZTDPayload = {
@@ -31,6 +32,10 @@ type GtdState = {
   /** 정리(organize) — 항목을 다른 리스트로 옮긴다 */
   moveItem: (id: string, list: ListId) => void;
   toggleDone: (id: string) => void;
+  /** «오늘 하기» 핀 켜기/끄기 */
+  togglePinToday: (id: string) => void;
+  /** 중요 표시 켜기/끄기 (high ↔ normal) */
+  toggleHighPriority: (id: string) => void;
   createProject: (partial?: Partial<Project>) => Project;
   updateProject: (id: string, patch: Partial<Project>) => void;
   deleteProject: (id: string) => void;
@@ -100,7 +105,8 @@ export const useGtdStore = create<GtdState>((set, get) => ({
         ready: true,
         items: file.items.map((i) => createEmptyItem(i)),
         projects: file.projects.map((p) => createEmptyProject(p)),
-        activeListId: file.activeListId ?? DEFAULT_LIST_ID,
+        // 일을 시작할 때는 항상 «지금 할 일»부터 본다
+        activeListId: DEFAULT_LIST_ID,
         storagePath: file.relativePath ?? file.filePath ?? 'data/kluztd.json',
         storageError: null,
       });
@@ -159,6 +165,27 @@ export const useGtdStore = create<GtdState>((set, get) => ({
       items: s.items.map((i) =>
         i.id === id
           ? touchItem({ ...i, done: !i.done, completedAt: i.done ? null : now })
+          : i,
+      ),
+    }));
+    scheduleSave(get);
+  },
+
+  togglePinToday: (id) => {
+    const today = todayInput();
+    set((s) => ({
+      items: s.items.map((i) =>
+        i.id === id ? touchItem({ ...i, todayPin: i.todayPin === today ? '' : today }) : i,
+      ),
+    }));
+    scheduleSave(get);
+  },
+
+  toggleHighPriority: (id) => {
+    set((s) => ({
+      items: s.items.map((i) =>
+        i.id === id
+          ? touchItem({ ...i, priority: i.priority === 'high' ? 'normal' : 'high' })
           : i,
       ),
     }));

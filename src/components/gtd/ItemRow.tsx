@@ -1,17 +1,31 @@
 import { useState } from 'react';
 
 import ItemDetail from '@/components/gtd/ItemDetail';
-import { LISTS } from '@/constants/lists';
+import { MOVABLE_LISTS } from '@/constants/lists';
 import { useGtdStore } from '@/stores/gtdStore';
 import type { Item } from '@/types/gtd';
 import { daysFromToday, dueLabel } from '@/utils/date';
+import { isPinnedToday, type FocusReason } from '@/utils/priority';
 
 type Props = {
   item: Item;
+  /** «지금 할 일»에서 보여 줄 순번 */
+  rank?: number;
+  /** «지금 할 일»에서 이 순서인 이유 — 있으면 날짜 라벨 대신 보여 준다 */
+  reasons?: FocusReason[];
 };
 
-export default function ItemRow({ item }: Props) {
+export const REASON_TONE_CLASS: Record<FocusReason['tone'], string> = {
+  danger: 'bg-danger/10 text-danger',
+  warn: 'bg-bg-warn-soft text-warn',
+  accent: 'bg-bg-accent-soft text-accent-ink',
+  muted: 'bg-bg-muted text-text-muted',
+};
+
+export default function ItemRow({ item, rank, reasons }: Props) {
   const toggleDone = useGtdStore((s) => s.toggleDone);
+  const togglePinToday = useGtdStore((s) => s.togglePinToday);
+  const toggleHighPriority = useGtdStore((s) => s.toggleHighPriority);
   const moveItem = useGtdStore((s) => s.moveItem);
   const deleteItem = useGtdStore((s) => s.deleteItem);
   const projects = useGtdStore((s) => s.projects);
@@ -19,6 +33,8 @@ export default function ItemRow({ item }: Props) {
 
   const project = projects.find((p) => p.id === item.projectId) ?? null;
   const overdue = !item.done && item.due ? (daysFromToday(item.due) ?? 1) <= 0 : false;
+  const pinned = isPinnedToday(item);
+  const high = item.priority === 'high';
 
   return (
     <div
@@ -29,6 +45,11 @@ export default function ItemRow({ item }: Props) {
       }`}
     >
       <div className="flex items-start gap-3">
+        {rank !== undefined ? (
+          <div className="mt-0.5 w-5 shrink-0 text-right text-xs font-extrabold tabular-nums text-text-muted">
+            {rank}
+          </div>
+        ) : null}
         <button
           type="button"
           onClick={() => toggleDone(item.id)}
@@ -56,14 +77,24 @@ export default function ItemRow({ item }: Props) {
             {item.title || '(제목 없음)'}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-[0.72rem] font-medium text-text-secondary">
+            {reasons?.map((r) => (
+              <div
+                key={r.label}
+                className={`rounded-full px-2 py-0.5 font-bold ${REASON_TONE_CLASS[r.tone]}`}
+              >
+                {r.label}
+              </div>
+            ))}
             {project ? (
               <div className="rounded-full bg-bg-accent-soft px-2 py-0.5 font-bold text-accent-ink">
                 {project.name}
               </div>
             ) : null}
             {item.context ? <div className="text-text-muted">{item.context}</div> : null}
-            {item.waitingFor ? <div className="text-warn">→ {item.waitingFor}</div> : null}
-            {item.due ? (
+            {item.waitingFor && !reasons ? (
+              <div className="text-warn">→ {item.waitingFor}</div>
+            ) : null}
+            {item.due && !reasons ? (
               <div className={overdue ? 'font-bold text-danger' : 'text-text-muted'}>
                 {dueLabel(item.due)}
               </div>
@@ -77,12 +108,42 @@ export default function ItemRow({ item }: Props) {
           ) : null}
         </button>
 
+        {!item.done ? (
+          <>
+            <button
+              type="button"
+              onClick={() => toggleHighPriority(item.id)}
+              aria-label={high ? '중요 해제' : '중요 표시'}
+              aria-pressed={high}
+              title={high ? '중요 해제' : '중요 표시'}
+              className={`motion-pop shrink-0 rounded-xl px-1.5 py-1 text-sm leading-none font-bold ${
+                high ? 'text-warn' : 'text-text-muted/60 hover:text-warn'
+              }`}
+            >
+              {high ? '★' : '☆'}
+            </button>
+            <button
+              type="button"
+              onClick={() => togglePinToday(item.id)}
+              aria-pressed={pinned}
+              title={pinned ? '오늘 하기 해제' : '오늘 하기로 찍기 — «지금 할 일» 위로 올라간다'}
+              className={`motion-pop shrink-0 rounded-xl border px-2 py-1 text-xs font-bold ${
+                pinned
+                  ? 'border-accent/35 bg-bg-accent-soft text-accent-ink'
+                  : 'border-transparent text-text-muted hover:text-accent-ink'
+              }`}
+            >
+              오늘
+            </button>
+          </>
+        ) : null}
+
         <select
           value={item.list}
           onChange={(e) => moveItem(item.id, e.target.value as Item['list'])}
           className="shrink-0 rounded-xl border border-border-default bg-bg-surface px-2 py-1 text-xs font-bold text-text-secondary outline-none"
         >
-          {LISTS.filter((l) => l.id !== 'done').map((l) => (
+          {MOVABLE_LISTS.map((l) => (
             <option key={l.id} value={l.id}>
               {l.title}
             </option>

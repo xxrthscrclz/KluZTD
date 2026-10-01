@@ -31,6 +31,11 @@ pnpm dev          # http://localhost:5173
 
 ## 쓰는 흐름
 
+0. **지금 할 일** — 열면 처음 보이는 화면. 열린 항목을 먼저 해야 하는 순서로 자동 정렬하고, 1순위는 «지금 이것부터» 카드로 크게 보여 준다.
+   순서: 마감 지남 → 오늘 마감 → «오늘» 찍은 것 → 답이 늦은 대기(확인 필요) → ★ 중요 → 마감 임박(내일·3일·7일) → 나머지(오래 묵은 것이 조금씩 위로).
+   - 각 행의 ★ 로 중요 표시, «오늘» 로 오늘 하기 핀 (다음 날이 되면 자동으로 풀림).
+   - 위 입력창에 적으면 «다음 행동» + 오늘 하기로 바로 들어간다. 끝에 `!` 를 붙이면 중요 (`보고서 제출 !`).
+   - 수집함·언젠가·참고는 여기 안 나온다. 일정은 7일 안으로 들어와야, 대기는 날짜가 지나야 나온다.
 1. **수집** — 위쪽 입력창에 아무거나 던져 넣으면 «수집함»에 쌓인다.
 2. **정리** — 항목의 «정리»를 눌러 펼치면 메모·실행 상황·날짜·대기 대상·프로젝트를 붙일 수 있다.
 3. **분류** — 행 오른쪽 선택으로 «다음 행동»·«대기»·«일정»·«언젠가»·«참고»로 옮긴다.
@@ -46,7 +51,7 @@ src/
 ├── index.css                  # Tailwind + 테마 import + @theme 매핑
 ├── api/kluztdData.ts          # GET/PUT /api/kluztd
 ├── components/
-│   ├── gtd/                   # QuickCapture, ItemRow, ItemDetail, ListPanel, ProjectPanel
+│   ├── gtd/                   # FocusPanel, QuickCapture, ItemRow, ItemDetail, ListPanel, ProjectPanel
 │   ├── layout/Sidebar.tsx     # 리스트 내비 + 저장경로 + 테마/Export/Import
 │   └── ui/                    # Button, BrandLogo
 ├── constants/lists.ts         # 리스트 정의 (여기만 고치면 내비가 바뀜)
@@ -57,7 +62,7 @@ src/
 │   └── themeStore.ts          # 라이트/다크
 ├── styles/                    # light-theme / dark-theme / theme-utilities
 ├── types/gtd.ts               # Item, Project, ListId
-└── utils/                     # date, item
+└── utils/                     # date, item, priority(지금 할 일 순위)
 ```
 
 ## 바꿀 때 어디를 건드리면 되는지
@@ -66,6 +71,7 @@ src/
 - **항목 필드 추가** → `src/types/gtd.ts` + `src/utils/item.ts`(`createEmptyItem`) + `ItemRow`
 - **실행 상황 태그** → `src/constants/lists.ts` (`CONTEXTS`)
 - **항목 편집 필드** → `src/components/gtd/ItemDetail.tsx`
+- **«지금 할 일» 순서 기준** → `src/utils/priority.ts` (가중치만 고치면 된다)
 - **프로젝트 화면** → `src/components/gtd/ProjectPanel.tsx`
 - **색상** → `src/styles/light-theme.css` / `dark-theme.css` (둘 다 같은 토큰명)
 
@@ -75,4 +81,4 @@ src/
 
 - 저장은 **마지막에 쓴 쪽이 이긴다**. 같은 파일을 보는 탭을 여러 개 띄우면 오래된 탭이 나중에 저장하면서 최신 내용을 덮어쓸 수 있다 — 한 번에 한 탭만 쓴다.
 - `pnpm dev`는 브라우저를 자동으로 연다 (`vite.config.ts`의 `server.open`).
-- 프로젝트 화면을 보고 있는지 여부는 저장하지 않는다. 새로고침하면 마지막 리스트로 돌아온다.
+- 프로젝트 화면을 보고 있는지 여부는 저장하지 않는다. 새로고침하면 항상 «지금 할 일»로 시작한다.

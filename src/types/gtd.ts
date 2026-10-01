@@ -5,6 +5,7 @@
 
 /** 항목이 머무는 리스트 (= 화면 좌측 내비게이션 단위) */
 export type ListId =
+  | 'focus'
   | 'inbox'
   | 'next'
   | 'waiting'
@@ -22,7 +23,12 @@ export type ListDef = {
   subtitle: string;
   /** index.css @theme 에 매핑된 색 토큰 이름 */
   accentToken: string;
+  /** 항목이 실제로 머물지 않는 계산된 뷰 (예: 지금 할 일) — 이동 대상에서 빠진다 */
+  virtual?: boolean;
 };
+
+/** 중요도 — 없으면 normal */
+export type Priority = 'high' | 'normal' | 'low';
 
 export type Item = {
   id: string;
@@ -36,6 +42,9 @@ export type Item = {
   due: string;
   /** 대기 항목의 위임 대상 */
   waitingFor: string;
+  priority: Priority;
+  /** YYYY-MM-DD — 이 날짜에 «오늘 하기»로 찍었다. 날짜가 지나면 자동으로 풀린다 */
+  todayPin: string;
   done: boolean;
   createdAt: string;
   updatedAt: string;

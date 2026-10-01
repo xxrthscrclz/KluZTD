@@ -1,3 +1,4 @@
+import FocusPanel from '@/components/gtd/FocusPanel';
 import ListPanel from '@/components/gtd/ListPanel';
 import ProjectPanel from '@/components/gtd/ProjectPanel';
 import QuickCapture from '@/components/gtd/QuickCapture';
@@ -6,6 +7,7 @@ import { useGtdStore } from '@/stores/gtdStore';
 
 export default function HomePage() {
   const activeProjectId = useGtdStore((s) => s.activeProjectId);
+  const activeListId = useGtdStore((s) => s.activeListId);
 
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-[292px_1fr]">
@@ -14,6 +16,10 @@ export default function HomePage() {
         {activeProjectId ? (
           <div className="animate-[fadeUp_0.35s_ease_both]">
             <ProjectPanel projectId={activeProjectId} />
+          </div>
+        ) : activeListId === 'focus' ? (
+          <div className="animate-[fadeUp_0.35s_ease_both]">
+            <FocusPanel />
           </div>
         ) : (
           <>
