@@ -6,12 +6,16 @@ import { LISTS } from '@/constants/lists';
 import { useGtdStore } from '@/stores/gtdStore';
 import { useThemeStore } from '@/stores/themeStore';
 import type { Item, Project } from '@/types/gtd';
-import { countByList } from '@/utils/item';
+import { countByList, countOpenInProject } from '@/utils/item';
 
 export default function Sidebar() {
   const items = useGtdStore((s) => s.items);
+  const projects = useGtdStore((s) => s.projects);
   const activeListId = useGtdStore((s) => s.activeListId);
+  const activeProjectId = useGtdStore((s) => s.activeProjectId);
   const setActiveListId = useGtdStore((s) => s.setActiveListId);
+  const setActiveProjectId = useGtdStore((s) => s.setActiveProjectId);
+  const createProject = useGtdStore((s) => s.createProject);
   const exportPayload = useGtdStore((s) => s.exportPayload);
   const replaceAll = useGtdStore((s) => s.replaceAll);
   const storagePath = useGtdStore((s) => s.storagePath);
@@ -65,9 +69,9 @@ export default function Sidebar() {
         리스트
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5">
         {LISTS.map((list) => {
-          const active = list.id === activeListId;
+          const active = activeProjectId === null && list.id === activeListId;
           const count = countByList(items, list.id);
           return (
             <button
@@ -96,6 +100,62 @@ export default function Sidebar() {
             </button>
           );
         })}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-2 px-1 pt-1">
+          <div className="text-[0.68rem] font-extrabold tracking-[0.12em] text-text-muted uppercase">
+            프로젝트
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const project = createProject();
+              setActiveProjectId(project.id);
+            }}
+            className="motion-pop rounded-lg px-1.5 py-0.5 text-xs font-extrabold text-text-muted hover:text-accent-ink"
+          >
+            + 새로
+          </button>
+        </div>
+
+        {projects.length === 0 ? (
+          <div className="px-1 text-[0.7rem] leading-snug font-medium text-text-muted">
+            결과가 나오려면 두 단계 이상 필요한 일은 프로젝트로 묶으세요.
+          </div>
+        ) : (
+          projects.map((project) => {
+            const active = project.id === activeProjectId;
+            const open = countOpenInProject(items, project.id);
+            return (
+              <button
+                key={project.id}
+                type="button"
+                onClick={() => setActiveProjectId(project.id)}
+                className={`motion-pop flex items-center gap-2 rounded-2xl border px-3 py-2 text-left ${
+                  active
+                    ? 'border-accent/30 bg-bg-accent-soft'
+                    : 'border-transparent hover:border-sky/25 hover:bg-sky/10'
+                }`}
+              >
+                <div
+                  className={`min-w-0 flex-1 truncate text-sm font-bold ${
+                    project.status === 'done' ? 'text-text-muted line-through' : 'text-text-primary'
+                  }`}
+                >
+                  {project.name}
+                </div>
+                <div
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[0.7rem] font-extrabold tabular-nums ${
+                    open > 0 ? 'bg-bg-accent-soft text-accent-ink' : 'text-text-muted'
+                  }`}
+                >
+                  {open}
+                </div>
+              </button>
+            );
+          })
+        )}
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border-default pt-3">

@@ -42,3 +42,18 @@ export function itemsInList(items: Item[], list: ListId): Item[] {
 export function countByList(items: Item[], list: ListId): number {
   return itemsInList(items, list).length;
 }
+
+/** 프로젝트에 묶인 항목 (완료는 뒤로) */
+export function itemsInProject(items: Item[], projectId: string): Item[] {
+  return items
+    .filter((i) => i.projectId === projectId)
+    .sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return b.updatedAt.localeCompare(a.updatedAt);
+    });
+}
+
+/** 프로젝트에 남아 있는(미완료) 항목 수 */
+export function countOpenInProject(items: Item[], projectId: string): number {
+  return items.filter((i) => i.projectId === projectId && !i.done).length;
+}

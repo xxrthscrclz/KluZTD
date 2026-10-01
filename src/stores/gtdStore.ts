@@ -19,8 +19,11 @@ type GtdState = {
   items: Item[];
   projects: Project[];
   activeListId: ListId;
+  /** 프로젝트 뷰를 보고 있으면 프로젝트 id, 리스트 뷰면 null */
+  activeProjectId: string | null;
   hydrate: () => Promise<void>;
   setActiveListId: (id: ListId) => void;
+  setActiveProjectId: (id: string | null) => void;
   /** 수집(capture) — 제목만 받아 수집함에 넣는다 */
   captureItem: (title: string, partial?: Partial<Item>) => void;
   updateItem: (id: string, patch: Partial<Item>) => void;
@@ -28,7 +31,7 @@ type GtdState = {
   /** 정리(organize) — 항목을 다른 리스트로 옮긴다 */
   moveItem: (id: string, list: ListId) => void;
   toggleDone: (id: string) => void;
-  createProject: (partial?: Partial<Project>) => void;
+  createProject: (partial?: Partial<Project>) => Project;
   updateProject: (id: string, patch: Partial<Project>) => void;
   deleteProject: (id: string) => void;
   replaceAll: (payload: Omit<KluZTDPayload, 'version'>) => void;
@@ -88,6 +91,7 @@ export const useGtdStore = create<GtdState>((set, get) => ({
   items: [],
   projects: [],
   activeListId: DEFAULT_LIST_ID,
+  activeProjectId: null,
 
   hydrate: async () => {
     try {
@@ -112,8 +116,12 @@ export const useGtdStore = create<GtdState>((set, get) => ({
   },
 
   setActiveListId: (id) => {
-    set({ activeListId: id });
+    set({ activeListId: id, activeProjectId: null });
     scheduleSave(get);
+  },
+
+  setActiveProjectId: (id) => {
+    set({ activeProjectId: id });
   },
 
   captureItem: (title, partial = {}) => {
@@ -164,6 +172,7 @@ export const useGtdStore = create<GtdState>((set, get) => ({
     });
     set((s) => ({ projects: [...s.projects, project] }));
     scheduleSave(get);
+    return project;
   },
 
   updateProject: (id, patch) => {
@@ -187,6 +196,7 @@ export const useGtdStore = create<GtdState>((set, get) => ({
       projects: s.projects.filter((p) => p.id !== id),
       // 프로젝트가 사라지면 연결된 항목은 단독 행동으로 남긴다
       items: s.items.map((i) => (i.projectId === id ? { ...i, projectId: null } : i)),
+      activeProjectId: s.activeProjectId === id ? null : s.activeProjectId,
     }));
     scheduleSave(get);
   },
@@ -196,6 +206,7 @@ export const useGtdStore = create<GtdState>((set, get) => ({
       items: items.map((i) => createEmptyItem(i)),
       projects: projects.map((p) => createEmptyProject(p)),
       activeListId: activeListId ?? DEFAULT_LIST_ID,
+      activeProjectId: null,
     });
     scheduleSave(get);
   },
