@@ -1,43 +1,47 @@
-import type { ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
-type ButtonProps = {
-  children: ReactNode;
-  onClick?: () => void;
-  variant?: 'primary' | 'ghost' | 'danger';
-  size?: 'md' | 'sm';
-  type?: 'button' | 'submit';
-  className?: string;
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'subtle';
+type Size = 'sm' | 'md' | 'lg';
+
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: Variant;
+  size?: Size;
+  icon?: ReactNode;
+  trailing?: ReactNode;
 };
 
-const variantClass = {
+const variantClass: Record<Variant, string> = {
   primary:
-    'bg-gradient-to-br from-accent via-[#3b8af0] to-sky text-text-inverse shadow-[0_8px_22px_rgba(29,111,232,0.35)] hover:shadow-[0_12px_28px_rgba(29,111,232,0.45)]',
-  ghost:
-    'border border-border-strong bg-bg-surface/70 text-text-secondary hover:border-accent/35 hover:bg-bg-accent-soft hover:text-accent-ink hover:shadow-[0_6px_16px_rgba(29,111,232,0.1)]',
-  danger:
-    'border border-danger/25 text-danger hover:bg-danger/5 hover:shadow-[0_6px_16px_rgba(212,43,63,0.12)]',
-} as const;
+    'bg-text-primary text-bg-surface hover:opacity-90 active:opacity-80 disabled:opacity-40 shadow-card',
+  secondary:
+    'bg-bg-surface text-text-primary shadow-card hover:bg-bg-raised active:bg-bg-muted disabled:opacity-50',
+  ghost: 'text-text-secondary hover:bg-bg-hover hover:text-text-primary active:bg-bg-active disabled:opacity-40',
+  subtle: 'bg-bg-muted text-text-secondary hover:bg-bg-active hover:text-text-primary disabled:opacity-40',
+  danger: 'bg-danger text-white hover:opacity-90 active:opacity-80 disabled:opacity-40',
+};
 
-const sizeClass = {
-  md: 'px-4 py-2.5 text-sm font-bold',
-  sm: 'px-2.5 py-1.5 text-xs font-bold',
-} as const;
+const sizeClass: Record<Size, string> = {
+  sm: 'h-7 gap-1.5 rounded-lg px-2.5 text-[0.8rem]',
+  md: 'h-9 gap-2 rounded-[10px] px-3.5 text-sm',
+  lg: 'h-11 gap-2 rounded-xl px-5 text-[0.95rem]',
+};
 
-export default function Button({
-  children,
-  onClick,
-  variant = 'primary',
-  size = 'md',
-  type = 'button',
-  className = '',
-}: ButtonProps) {
+const Button = forwardRef<HTMLButtonElement, Props>(function Button(
+  { variant = 'secondary', size = 'md', icon, trailing, className = '', children, type = 'button', ...rest },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type={type}
-      onClick={onClick}
-      className={`motion-pop inline-flex items-center justify-center gap-1.5 rounded-2xl ${variantClass[variant]} ${sizeClass[size]} ${className}`}
+      className={`inline-flex flex-none items-center justify-center font-semibold whitespace-nowrap transition-[background,opacity,color,box-shadow] ${variantClass[variant]} ${sizeClass[size]} ${className}`}
+      {...rest}
     >
+      {icon}
       {children}
+      {trailing}
     </button>
   );
-}
+});
+
+export default Button;

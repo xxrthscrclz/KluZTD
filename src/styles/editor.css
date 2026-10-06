@@ -1,0 +1,420 @@
+/* 노션식 에디터(TipTap) 본문 스타일 — .kz-prose 안에서만 쓴다 */
+
+.kz-prose {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  caret-color: var(--color-accent);
+}
+
+.kz-prose.ProseMirror {
+  outline: none;
+  min-height: 1.7em;
+}
+
+.kz-prose > * + * {
+  margin-top: 0.3em;
+}
+
+.kz-prose p {
+  margin: 0;
+}
+
+.kz-prose h1,
+.kz-prose h2,
+.kz-prose h3 {
+  margin: 1.1em 0 0.15em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.kz-prose > :first-child {
+  margin-top: 0;
+}
+
+.kz-prose h1 {
+  font-size: 1.6em;
+}
+
+.kz-prose h2 {
+  font-size: 1.32em;
+}
+
+.kz-prose h3 {
+  font-size: 1.12em;
+}
+
+.kz-prose strong {
+  font-weight: 700;
+}
+
+.kz-prose a {
+  color: var(--color-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  text-underline-offset: 3px;
+}
+
+.kz-prose mark {
+  background: var(--color-mark);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.kz-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--color-code-bg);
+  color: var(--color-code-ink);
+  border-radius: 5px;
+  padding: 0.14em 0.36em;
+}
+
+/* 목록 */
+.kz-prose ul,
+.kz-prose ol {
+  margin: 0.2em 0;
+  padding-left: 1.45em;
+}
+
+.kz-prose ul {
+  list-style: disc;
+}
+
+.kz-prose ul ul {
+  list-style: circle;
+}
+
+.kz-prose ul ul ul {
+  list-style: square;
+}
+
+.kz-prose ol {
+  list-style: decimal;
+}
+
+.kz-prose li {
+  padding-left: 0.15em;
+}
+
+.kz-prose li::marker {
+  color: var(--color-text-muted);
+}
+
+.kz-prose li > p + * {
+  margin-top: 0.15em;
+}
+
+/* 체크리스트 */
+.kz-prose ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.1em;
+}
+
+.kz-prose ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55em;
+  padding-left: 0;
+}
+
+.kz-prose ul[data-type='taskList'] li > label {
+  flex: none;
+  margin-top: 0.28em;
+  user-select: none;
+}
+
+.kz-prose ul[data-type='taskList'] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.kz-prose ul[data-type='taskList'] input[type='checkbox'] {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 1.05em;
+  height: 1.05em;
+  margin: 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 5px;
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.kz-prose ul[data-type='taskList'] input[type='checkbox']::after {
+  content: '';
+  width: 0.55em;
+  height: 0.3em;
+  border-left: 2px solid var(--color-text-inverse);
+  border-bottom: 2px solid var(--color-text-inverse);
+  transform: translateY(-0.05em) rotate(-45deg) scale(0);
+  transition: transform 0.12s;
+}
+
+.kz-prose ul[data-type='taskList'] input[type='checkbox']:checked {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.kz-prose ul[data-type='taskList'] input[type='checkbox']:checked::after {
+  transform: translateY(-0.05em) rotate(-45deg) scale(1);
+}
+
+.kz-prose ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-border-strong);
+}
+
+/* 인용 */
+.kz-prose blockquote {
+  margin: 0.4em 0;
+  padding: 0.1em 0 0.1em 0.9em;
+  border-left: 3px solid var(--color-text-primary);
+  color: var(--color-text-secondary);
+}
+
+.kz-prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border-strong);
+  margin: 1em 0;
+}
+
+.kz-prose hr.ProseMirror-selectednode {
+  border-top-color: var(--color-accent);
+}
+
+/* 코드 블록 */
+.kz-prose pre {
+  position: relative;
+  margin: 0.5em 0;
+  padding: 2.1em 1em 0.9em;
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-border-default);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.kz-prose pre code {
+  background: none;
+  color: var(--color-text-primary);
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.kz-prose .hljs-comment,
+.kz-prose .hljs-quote {
+  color: var(--color-hl-comment);
+  font-style: italic;
+}
+
+.kz-prose .hljs-keyword,
+.kz-prose .hljs-selector-tag,
+.kz-prose .hljs-built_in,
+.kz-prose .hljs-literal {
+  color: var(--color-hl-keyword);
+}
+
+.kz-prose .hljs-string,
+.kz-prose .hljs-regexp,
+.kz-prose .hljs-addition {
+  color: var(--color-hl-string);
+}
+
+.kz-prose .hljs-number,
+.kz-prose .hljs-symbol,
+.kz-prose .hljs-variable,
+.kz-prose .hljs-template-variable {
+  color: var(--color-hl-number);
+}
+
+.kz-prose .hljs-title,
+.kz-prose .hljs-section,
+.kz-prose .hljs-function,
+.kz-prose .hljs-name {
+  color: var(--color-hl-title);
+}
+
+.kz-prose .hljs-attr,
+.kz-prose .hljs-attribute,
+.kz-prose .hljs-property,
+.kz-prose .hljs-type,
+.kz-prose .hljs-meta {
+  color: var(--color-hl-attr);
+}
+
+.kz-prose .hljs-deletion {
+  color: var(--color-danger);
+}
+
+/* 표 */
+.kz-prose .tableWrapper {
+  margin: 0.6em 0;
+  overflow-x: auto;
+}
+
+.kz-prose table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 18rem;
+  font-size: 0.94em;
+}
+
+.kz-prose th,
+.kz-prose td {
+  position: relative;
+  min-width: 5em;
+  padding: 0.42em 0.65em;
+  border: 1px solid var(--color-border-strong);
+  vertical-align: top;
+  text-align: left;
+}
+
+.kz-prose th {
+  background: var(--color-bg-muted);
+  font-weight: 650;
+}
+
+.kz-prose th > p,
+.kz-prose td > p {
+  margin: 0;
+}
+
+.kz-prose .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  pointer-events: none;
+}
+
+.kz-prose .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-accent);
+  pointer-events: none;
+}
+
+/* 콜아웃 */
+.kz-prose .kz-callout {
+  display: flex;
+  gap: 0.6em;
+  margin: 0.5em 0;
+  padding: 0.75em 0.95em;
+  border-radius: 10px;
+  background: var(--color-callout-note);
+}
+
+.kz-prose .kz-callout[data-variant='info'] {
+  background: var(--color-callout-info);
+}
+
+.kz-prose .kz-callout[data-variant='warn'] {
+  background: var(--color-callout-warn);
+}
+
+.kz-prose .kz-callout[data-variant='success'] {
+  background: var(--color-callout-success);
+}
+
+.kz-prose .kz-callout[data-variant='danger'] {
+  background: var(--color-callout-danger);
+}
+
+.kz-prose .kz-callout-icon {
+  flex: none;
+  width: 1.5em;
+  height: 1.5em;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kz-prose .kz-callout-icon:hover {
+  background: var(--color-bg-active);
+}
+
+.kz-prose .kz-callout-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 비어 있을 때 안내 문구 */
+.kz-prose p.is-editor-empty:first-child::before,
+.kz-prose .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.kz-prose .ProseMirror-gapcursor::after {
+  border-top-color: var(--color-text-primary);
+}
+
+/* 읽기 전용 미리보기 */
+.kz-prose.kz-readonly {
+  font-size: 0.875rem;
+}
+
+.kz-prose.kz-readonly ul[data-type='taskList'] input[type='checkbox'] {
+  pointer-events: none;
+}
+
+/* 수식 (KaTeX) */
+.kz-prose .tiptap-mathematics-render {
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+
+.kz-prose .tiptap-mathematics-render--editable {
+  cursor: pointer;
+}
+
+.kz-prose .tiptap-mathematics-render--editable:hover,
+.kz-prose .ProseMirror-selectednode .tiptap-mathematics-render,
+.kz-prose .tiptap-mathematics-render.ProseMirror-selectednode {
+  background: var(--color-bg-hover);
+}
+
+.kz-prose [data-type='inline-math'] {
+  padding: 0 2px;
+}
+
+.kz-prose [data-type='block-math'],
+.kz-prose .block-math-inner {
+  display: block;
+  margin: 0.5em 0;
+  padding: 0.6em 0.4em;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.kz-prose .inline-math-error,
+.kz-prose .block-math-error {
+  color: var(--color-danger);
+}

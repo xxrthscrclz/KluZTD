@@ -2,61 +2,112 @@
 @import './styles/light-theme.css';
 @import './styles/dark-theme.css';
 @import './styles/theme-utilities.css';
+@import './styles/editor.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* transition 유틸의 기본 시간·곡선 — 모든 반응 0.5초 ease */
+@theme {
+  --default-transition-duration: 0.5s;
+  --default-transition-timing-function: ease;
+}
+
+/* 테마 CSS 변수 → Tailwind 유틸 (bg-bg-page, text-text-primary, bg-status-doing …) */
 @theme inline {
   --color-bg-page: var(--color-bg-page);
-  --color-bg-page-deep: var(--color-bg-page-deep);
   --color-bg-surface: var(--color-bg-surface);
-  --color-bg-surface-soft: var(--color-bg-surface-soft);
+  --color-bg-raised: var(--color-bg-raised);
   --color-bg-muted: var(--color-bg-muted);
-  --color-bg-accent-soft: var(--color-bg-accent-soft);
-  --color-bg-warn-soft: var(--color-bg-warn-soft);
+  --color-bg-sunken: var(--color-bg-sunken);
+  --color-bg-hover: var(--color-bg-hover);
+  --color-bg-active: var(--color-bg-active);
+  --color-bg-overlay: var(--color-bg-overlay);
+  --color-border-default: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-muted);
   --color-text-inverse: var(--color-text-inverse);
-  --color-border-default: var(--color-border-default);
-  --color-border-strong: var(--color-border-strong);
   --color-accent: var(--color-accent);
   --color-accent-ink: var(--color-accent-ink);
-  --color-sky: var(--color-sky);
-  --color-warn: var(--color-warn);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-status-inbox: var(--color-status-inbox);
+  --color-status-inbox-soft: var(--color-status-inbox-soft);
+  --color-status-todo: var(--color-status-todo);
+  --color-status-todo-soft: var(--color-status-todo-soft);
+  --color-status-doing: var(--color-status-doing);
+  --color-status-doing-soft: var(--color-status-doing-soft);
+  --color-status-waiting: var(--color-status-waiting);
+  --color-status-waiting-soft: var(--color-status-waiting-soft);
+  --color-status-done: var(--color-status-done);
+  --color-status-done-soft: var(--color-status-done-soft);
+  --color-prio-high: var(--color-prio-high);
+  --color-prio-normal: var(--color-prio-normal);
+  --color-prio-low: var(--color-prio-low);
   --color-danger: var(--color-danger);
-  --color-phase-kickoff: var(--color-phase-kickoff);
-  --color-phase-pre: var(--color-phase-pre);
-  --color-phase-during: var(--color-phase-during);
-  --color-phase-post: var(--color-phase-post);
-  --color-progress: var(--color-progress);
-  --font-sans: 'Noto Sans KR', 'Outfit', system-ui, sans-serif;
-  --shadow-surface: var(--shadow-surface);
+  --color-danger-soft: var(--color-danger-soft);
+  --color-warn: var(--color-warn);
+  --color-warn-soft: var(--color-warn-soft);
+  --color-success: var(--color-success);
+  --color-callout-info: var(--color-callout-info);
+  --color-callout-warn: var(--color-callout-warn);
+  --color-callout-success: var(--color-callout-success);
+  --color-callout-danger: var(--color-callout-danger);
+  --color-callout-note: var(--color-callout-note);
+  --color-code-bg: var(--color-code-bg);
+  --color-code-ink: var(--color-code-ink);
+  --color-hl-keyword: var(--color-hl-keyword);
+  --color-hl-string: var(--color-hl-string);
+  --color-hl-number: var(--color-hl-number);
+  --color-hl-comment: var(--color-hl-comment);
+  --color-hl-title: var(--color-hl-title);
+  --color-hl-attr: var(--color-hl-attr);
+  --color-mark: var(--color-mark);
+  --color-scroll-thumb: var(--color-scroll-thumb);
+  --color-scroll-thumb-hover: var(--color-scroll-thumb-hover);
+  --color-avatar-1: var(--color-avatar-1);
+  --color-avatar-1-ink: var(--color-avatar-1-ink);
+  --color-avatar-2: var(--color-avatar-2);
+  --color-avatar-2-ink: var(--color-avatar-2-ink);
+  --color-avatar-3: var(--color-avatar-3);
+  --color-avatar-3-ink: var(--color-avatar-3-ink);
+  --color-avatar-4: var(--color-avatar-4);
+  --color-avatar-4-ink: var(--color-avatar-4-ink);
+  --color-avatar-5: var(--color-avatar-5);
+  --color-avatar-5-ink: var(--color-avatar-5-ink);
+  --color-avatar-6: var(--color-avatar-6);
+  --color-avatar-6-ink: var(--color-avatar-6-ink);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-pop: var(--shadow-pop);
+  --shadow-drag: var(--shadow-drag);
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --breakpoint-xs: 26rem;
 }
 
 @layer base {
   html {
-    scroll-behavior: smooth;
-  }
-
-  html,
-  body,
-  #root {
-    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     margin: 0;
-    font-family: var(--font-sans);
-    font-weight: 500;
+    min-height: 100dvh;
+    background: var(--color-bg-page);
     color: var(--color-text-primary);
-    background:
-      radial-gradient(ellipse 70% 45% at 0% 0%, color-mix(in srgb, var(--color-sky) 28%, transparent), transparent 55%),
-      radial-gradient(ellipse 55% 40% at 100% 0%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 50%),
-      radial-gradient(ellipse 50% 35% at 50% 100%, color-mix(in srgb, var(--color-sky) 12%, transparent), transparent 55%),
-      linear-gradient(180deg, var(--color-bg-page) 0%, var(--color-bg-page-deep) 100%);
-    background-attachment: fixed;
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss06', 'tnum' 0;
+    letter-spacing: -0.006em;
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.015em;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 24%, transparent);
   }
 
   button,
@@ -65,64 +116,45 @@
   select {
     font: inherit;
     color: inherit;
+    letter-spacing: inherit;
   }
 
-  ::selection {
-    background: color-mix(in srgb, var(--color-accent) 28%, white);
-    color: var(--color-text-primary);
-  }
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes checkPulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 35%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 8px transparent;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  button {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  button:disabled {
+    cursor: default;
+  }
+
+  /* 누르고 올리는 모든 것은 색·배경·그림자가 0.5초에 걸쳐 부드럽게 */
+  button,
+  a,
+  input,
+  textarea,
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  [role='checkbox'],
+  [role='gridcell'] {
+    transition-property: color, background-color, border-color, box-shadow, opacity, outline-color, text-decoration-color;
+    transition-duration: var(--kz-dur);
+    transition-timing-function: var(--kz-ease);
+  }
+
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  input[type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
   }
 }

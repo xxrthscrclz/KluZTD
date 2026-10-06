@@ -1,26 +1,82 @@
+/* 다크 테마 — light-theme.css 와 같은 토큰 이름 */
 .dark {
-  --color-bg-page: #0a101a;
-  --color-bg-page-deep: #060b14;
-  --color-bg-surface: #121a28;
-  --color-bg-surface-soft: rgba(18, 26, 40, 0.92);
-  --color-bg-muted: rgba(255, 255, 255, 0.05);
-  --color-bg-accent-soft: rgba(29, 111, 232, 0.22);
-  --color-bg-warn-soft: rgba(196, 122, 18, 0.18);
-  --color-text-primary: #eef4fb;
-  --color-text-secondary: #9aadc4;
-  --color-text-muted: #6b7f98;
-  --color-text-inverse: #ffffff;
-  --color-border-default: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.14);
-  --color-accent: #4d8fff;
-  --color-accent-ink: #8bb6ff;
-  --color-sky: #7ec8ff;
-  --color-warn: #e0a04a;
-  --color-danger: #f07178;
-  --color-phase-kickoff: #9ec0ff;
-  --color-phase-pre: #5b9bff;
-  --color-phase-during: #7ec8ff;
-  --color-phase-post: #38bdf8;
-  --color-progress: #4d8fff;
-  --shadow-surface: 0 1px 0 rgba(0, 0, 0, 0.25), 0 16px 40px rgba(0, 0, 0, 0.4);
+  --color-bg-page: #141413;
+  --color-bg-surface: #1c1c1a;
+  --color-bg-raised: #222220;
+  --color-bg-muted: #2a2a27;
+  --color-bg-sunken: #181817;
+  --color-bg-hover: rgba(237, 236, 232, 0.06);
+  --color-bg-active: rgba(237, 236, 232, 0.1);
+  --color-bg-overlay: rgba(0, 0, 0, 0.55);
+
+  --color-border-default: #2d2c29;
+  --color-border-strong: #3c3b37;
+
+  --color-text-primary: #edece8;
+  --color-text-secondary: #b4b1a9;
+  --color-text-muted: #7e7b74;
+  --color-text-inverse: #141413;
+
+  --color-accent: #7d8dff;
+  --color-accent-ink: #a9b3ff;
+  --color-accent-soft: #23264a;
+
+  --color-status-inbox: #a39e91;
+  --color-status-inbox-soft: #2a2925;
+  --color-status-todo: #8fa0bf;
+  --color-status-todo-soft: #222833;
+  --color-status-doing: #7d8dff;
+  --color-status-doing-soft: #23264a;
+  --color-status-waiting: #e6a43a;
+  --color-status-waiting-soft: #352a17;
+  --color-status-done: #4cc08a;
+  --color-status-done-soft: #183126;
+
+  --color-prio-high: #ff6b6f;
+  --color-prio-normal: #f0a24a;
+  --color-prio-low: #8b919c;
+
+  --color-danger: #ff6b63;
+  --color-danger-soft: #3a1d1b;
+  --color-warn: #e6a43a;
+  --color-warn-soft: #352a17;
+  --color-success: #4cc08a;
+
+  --color-callout-info: #20243d;
+  --color-callout-warn: #33291a;
+  --color-callout-success: #18291f;
+  --color-callout-danger: #352020;
+  --color-callout-note: #262624;
+
+  --color-code-bg: #232321;
+  --color-code-ink: #ff8fa6;
+  --color-hl-keyword: #c49bff;
+  --color-hl-string: #7fd6a0;
+  --color-hl-number: #f0a868;
+  --color-hl-comment: #7e7b74;
+  --color-hl-title: #8fb2ff;
+  --color-hl-attr: #f08bc4;
+  --color-mark: #5b4e14;
+
+  /* 위임 대상 아바타 (이름마다 고정) */
+  --color-avatar-1: #272c55;
+  --color-avatar-1-ink: #b3bcff;
+  --color-avatar-2: #3d2420;
+  --color-avatar-2-ink: #ffab98;
+  --color-avatar-3: #1a3326;
+  --color-avatar-3-ink: #8de0b1;
+  --color-avatar-4: #382c16;
+  --color-avatar-4-ink: #f2c06d;
+  --color-avatar-5: #2f2240;
+  --color-avatar-5-ink: #d3a8ff;
+  --color-avatar-6: #17303a;
+  --color-avatar-6-ink: #8ad3e8;
+
+  --color-scroll-thumb: rgba(237, 236, 232, 0.16);
+  --color-scroll-thumb-hover: rgba(237, 236, 232, 0.3);
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-card-hover: 0 8px 22px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --shadow-pop: 0 22px 54px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --shadow-drag: 0 24px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(125, 141, 255, 0.5);
 }
