@@ -17,10 +17,9 @@ if [ ! -d node_modules ]; then
   $PKG install || exit 1
 fi
 
-if [ ! -f dist/index.html ]; then
-  echo "빌드 중…"
-  $PKG run build || exit 1
-fi
+# 코드가 바뀌었을 수 있으니 매번 빌드 (몇 초)
+echo "빌드 중…"
+$PKG run build || exit 1
 
 echo "KluZTD 실행 → http://localhost:4273"
 $PKG run preview

@@ -5,3 +5,10 @@ dist
 package-lock.json
 .pnpm-store
 data/kluztd.json
+data/kluztd.json.*
+data/backups
+test-results
+playwright-report
+e2e/.data
+dev-dist
+e2e/.shots
