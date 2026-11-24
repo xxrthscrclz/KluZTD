@@ -2,7 +2,7 @@
 
 나만의 할 일 관리. **로컬 전용** — 데이터는 내 컴퓨터의 JSON 파일 하나에만 저장된다.
 
-> 📘 **처음 쓰는 사람은 [사용 가이드](docs/guide.html)** — 설치(맥 앱), 화면별 사용법, 데이터·백업, 문제 해결.
+> 📘 **처음 쓰는 사람은 [사용 가이드](docs/guide.html)** — 설치(맥·윈도우 앱), 화면별 사용법, 데이터·백업, 문제 해결.
 > 브라우저로 보려면 저장소를 받은 뒤 `open docs/guide.html`.
 
 화면 다섯, 자유공간은 어디서나. **체크리스트 한 줄 = 상태 관리 카드 하나 = 같은 할 일** — 어디서 바꾸든 모두에 반영된다.
@@ -55,6 +55,16 @@ ditto release/mac*/KluZTD.app /Applications/KluZTD.app
 - 데이터: `~/Library/Application Support/KluZTD/kluztd.json` (+ `backups/`). 메뉴 «데이터 → 데이터 폴더 열기». **브라우저 모드의 `data/kluztd.json` 과는 다른 파일이다.**
 - 앱에서는 PWA 서비스워커를 쓰지 않는다 (업데이트 직후 옛 화면이 뜨는 걸 막으려고).
 
+### 윈도우 앱 (Electron)
+
+```bash
+pnpm app:win        # release/KluZTD-Setup-<버전>.exe (x64, 맥에서도 Wine 없이 만들어짐)
+```
+
+- NSIS 설치 파일: 사용자 계정에 설치(관리자 권한 X), 설치 위치 선택, 시작 메뉴·바탕화면 바로가기. 서명하지 않아 SmartScreen 에서 «추가 정보 → 실행».
+- 데이터: `%APPDATA%\KluZTD\kluztd.json` — 맥 앱과 형식이 같아 파일을 그대로 옮길 수 있다.
+- 아이콘: `build/icon-win.png` (`pnpm icons` 가 만든다, 여백 없음).
+
 ### 브라우저
 
 ```bash
@@ -90,9 +100,10 @@ data/backups/             ← 하루 한 번 자동 백업, 최근 14개
 2. `scripts/gen-icons.mjs` 의 `CROP`(쓸 정사각형 영역)을 그림에 맞춘다 — 그림에 테두리가 그려져 있으면 그 안쪽만. 모양은 애플 아이콘 비율(모서리 22.5%)로 깎고 테두리를 그 모양대로 다시 그린다
 3. `pnpm icons` → 아래를 한 번에 다시 만든다
    - `build/icon.png` — macOS 앱 아이콘 (1024, 애플 규격 여백·그림자)
+   - `build/icon-win.png` — 윈도우 앱 아이콘 (512, 여백 없음)
    - `public/logo.png` — 앱 안 로고·파비콘
    - `public/icons/*` — PWA 아이콘 (maskable·apple-touch 포함)
-4. 앱에 반영: `pnpm app:dist` 후 `/Applications` 에 다시 복사
+4. 앱에 반영: `pnpm app:dist` 후 `/Applications` 에 다시 복사 (윈도우는 `pnpm app:win`)
 
 ## 테스트
 

@@ -10,7 +10,8 @@ import { createDataApi } from '../server/dataApi';
  * 데스크톱 앱 — dist(웹 빌드)와 데이터 API 를 앱 안의 작은 로컬 서버로 띄우고 창에서 연다.
  *
  * - 포트를 고정하는 이유: 오리진(127.0.0.1:포트)이 바뀌면 localStorage 캐시·테마 설정이 매번 초기화된다.
- * - 데이터 파일: ~/Library/Application Support/KluZTD/kluztd.json (KLUZTD_DATA_FILE 로 변경 가능)
+ * - 데이터 파일: macOS ~/Library/Application Support/KluZTD/kluztd.json
+ *              Windows %APPDATA%\KluZTD\kluztd.json   (KLUZTD_DATA_FILE 로 변경 가능)
  *   백업은 같은 폴더의 backups/ 에 하루 한 번.
  */
 
@@ -109,7 +110,8 @@ function createWindow() {
 function buildMenu() {
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
-      { role: 'appMenu' },
+      // macOS 는 앱 이름 메뉴, Windows 는 '파일' 메뉴(닫기·끝내기)
+      process.platform === 'darwin' ? { role: 'appMenu' } : { role: 'fileMenu' },
       { role: 'editMenu' },
       {
         label: '보기',

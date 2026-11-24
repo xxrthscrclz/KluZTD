@@ -16,7 +16,8 @@
     "electron:main": "esbuild electron/main.ts --bundle --platform=node --format=cjs --target=node22 --external:electron --outfile=dist-electron/main.cjs",
     "app": "pnpm build && pnpm electron:main && electron .",
     "app:dist": "pnpm build && pnpm electron:main && electron-builder --mac --dir",
-    "app:dmg": "pnpm build && pnpm electron:main && electron-builder --mac dmg"
+    "app:dmg": "pnpm build && pnpm electron:main && electron-builder --mac dmg",
+    "app:win": "pnpm build && pnpm electron:main && electron-builder --win nsis --x64"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -88,6 +89,22 @@
       ],
       "identity": null
     },
-    "npmRebuild": false
+    "npmRebuild": false,
+    "win": {
+      "icon": "build/icon-win.png",
+      "target": [
+        "nsis"
+      ],
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "KluZTD",
+      "artifactName": "KluZTD-Setup-${version}.${ext}"
+    }
   }
 }

@@ -8,6 +8,7 @@
  *
  * 만드는 것
  *   build/icon.png                 macOS 앱 아이콘 (1024, 애플 규격 여백 + 그림자) — electron-builder 가 씀
+ *   build/icon-win.png             Windows 앱 아이콘 (512, 여백 없음)
  *   public/logo.png                앱 안 로고(사이드바)·파비콘
  *   public/icons/*.png             PWA 아이콘
  *
@@ -36,6 +37,8 @@ const NAVY = '#0a1a4f';
 const targets = [
   // macOS: 1024 캔버스에 824 그림 + 아래로 떨어지는 그림자 (Big Sur 이후 아이콘 규격)
   { file: 'build/icon.png', size: 1024, inner: 824, shadow: true },
+  // Windows: 작업표시줄·바탕화면은 여백 없이 꽉 채운 아이콘 (electron-builder 가 .ico 로 변환)
+  { file: 'build/icon-win.png', size: 512, inner: 512 },
   { file: 'public/logo.png', size: 256, inner: 256 },
   { file: 'public/icons/icon-192.png', size: 192, inner: 192 },
   { file: 'public/icons/icon-512.png', size: 512, inner: 512 },
