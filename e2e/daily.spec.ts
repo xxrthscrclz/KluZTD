@@ -301,3 +301,28 @@ test('알림이 많으면 급한 것 몇 개만 먼저, «더 보기»로 펼친
   await expect(panel.getByTestId('urgent-item')).toHaveCount(5);
   await expect(page.getByTestId('urgent-badge')).toHaveText('5');
 });
+
+test('트랙패드 두 손가락 가로 스와이프로 전날·다음날, 한 번 밀면 하루만', async ({ page }) => {
+  await open(page, '/daily');
+  const title = page.getByTestId('day-title');
+  const dayOf = (n: number) => `${new Date(Date.now() + n * 86_400_000).getDate()}일`;
+  const box = (await title.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + 200);
+
+  // 한 제스처(관성 포함)에 이벤트가 여러 번 와도 하루만 넘어간다
+  for (let i = 0; i < 12; i++) await page.mouse.wheel(40, 2);
+  await expect(title).toContainText(dayOf(1));
+  await expect(page).toHaveURL(new RegExp(`/daily/${dateKey(1)}$`));
+
+  await page.waitForTimeout(400); // 제스처 끝
+  for (let i = 0; i < 6; i++) await page.mouse.wheel(-40, 0);
+  await expect(title).toContainText(dayOf(0));
+  await page.waitForTimeout(400);
+  for (let i = 0; i < 6; i++) await page.mouse.wheel(-40, 0);
+  await expect(title).toContainText(dayOf(-1));
+
+  // 세로 스크롤은 날짜를 바꾸지 않는다
+  await page.waitForTimeout(400);
+  for (let i = 0; i < 6; i++) await page.mouse.wheel(20, 80);
+  await expect(title).toContainText(dayOf(-1));
+});

@@ -123,3 +123,36 @@ test('모바일 수첩: 목록 → 한 장 → 뒤로', async ({ page }) => {
   await page.getByTestId('note-list-toggle').click();
   await expect(page.getByTestId('note-list')).toBeVisible();
 });
+
+test('모바일: 일일 관리 — 옆으로 쓸면 전날·다음날, 세로 스크롤·입력칸에선 안 넘어감', async ({ page }) => {
+  await open(page, '/daily');
+  const title = page.getByTestId('day-title');
+  const dayOf = (n: number) => `${new Date(Date.now() + n * 86_400_000).getDate()}일`;
+  const cdp = await page.context().newCDPSession(page);
+  const swipe = async (from: { x: number; y: number }, dx: number, dy = 0) => {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+    for (let i = 1; i <= 6; i++) {
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: from.x + (dx * i) / 6, y: from.y + (dy * i) / 6 }],
+      });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  };
+  const box = (await title.boundingBox())!;
+  const at = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+
+  await swipe(at, -160); // 왼쪽으로 → 다음날
+  await expect(title).toContainText(dayOf(1));
+  await swipe(at, 160); // 오른쪽으로 → 전날
+  await expect(title).toContainText(dayOf(0));
+  await swipe(at, 160);
+  await expect(title).toContainText(dayOf(-1));
+
+  await swipe(at, 40, 200); // 세로가 더 크면 스크롤
+  await expect(title).toContainText(dayOf(-1));
+
+  const input = (await page.getByTestId('day-add').boundingBox())!;
+  await swipe({ x: input.x + input.width / 2, y: input.y + input.height / 2 }, -160); // 입력칸 위
+  await expect(title).toContainText(dayOf(-1));
+});

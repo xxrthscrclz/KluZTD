@@ -8,13 +8,15 @@ import DayNav from '@/components/daily/DayNav';
 import UrgentPanel from '@/components/daily/UrgentPanel';
 import type { FocusRequest, HighlightRequest } from '@/components/task/IssueList';
 import { useDirection } from '@/hooks/useDirection';
+import { useSwipeNav } from '@/hooks/useSwipeNav';
 import { useTaskStore } from '@/stores/taskStore';
-import { fromDateKey, todayIsoKey } from '@/utils/date';
+import { addDays, fromDateKey, toDateKey, todayIsoKey } from '@/utils/date';
 
 /**
  * 일일 관리 — 날짜별 페이지.
  * 왼쪽: 그날 체크리스트(= 할 일) → 이날 마감인데 빠진 것 → 그날 이슈
  * 오른쪽: 마감 임박인데 체크리스트에 없는 것 (빨간 알림)
+ * 좌우 스와이프(터치·트랙패드)로 전날/다음날.
  */
 export default function DailyPage() {
   const params = useParams<{ date?: string }>();
@@ -38,6 +40,8 @@ export default function DailyPage() {
   }, [location.state]);
 
   const go = (next: string) => navigate(next === today ? '/daily' : `/daily/${next}`, { replace: true });
+  const shift = (n: number) => go(toDateKey(addDays(fromDateKey(date) ?? new Date(), n)));
+  useSwipeNav(pageRef, () => shift(-1), () => shift(1));
 
   /** 체크리스트 줄의 '이슈 기록' → 그 줄에 연결된 새 이슈를 열고 커서 */
   const issueFor = (taskId: string) => {
@@ -52,7 +56,7 @@ export default function DailyPage() {
   };
 
   return (
-    <div ref={pageRef} className="@container mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pt-4 pb-28 sm:px-8 sm:pt-7 sm:pb-24">
+    <div ref={pageRef} data-testid="daily-page" className="@container mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pt-4 pb-28 sm:px-8 sm:pt-7 sm:pb-24">
       <DayNav date={date} onChange={go} />
 
       <div className="grid grid-cols-1 gap-5 @4xl:grid-cols-[minmax(0,1fr)_19rem]">
