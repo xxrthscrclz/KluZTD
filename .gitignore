@@ -12,3 +12,5 @@ playwright-report
 e2e/.data
 dev-dist
 e2e/.shots
+dist-electron
+release

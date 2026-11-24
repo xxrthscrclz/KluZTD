@@ -17,5 +17,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "vite.kluztd-data.ts", "playwright.config.ts", "e2e"]
+  "include": ["vite.config.ts", "vite.kluztd-data.ts", "server", "electron", "playwright.config.ts", "e2e"]
 }
