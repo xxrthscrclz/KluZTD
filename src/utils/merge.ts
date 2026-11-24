@@ -18,7 +18,7 @@ function mergeById<T extends WithId>(a: T[], b: T[], dead: Record<string, string
 
 /**
  * 두 기기/탭의 데이터를 합친다.
- * - 할 일·프로젝트·이슈: id 단위, 더 늦게 고친 쪽
+ * - 할 일·프로젝트·이슈·수첩 페이지: id 단위, 더 늦게 고친 쪽
  * - 이슈는 날짜별로 따로 합친다 (한쪽은 할 일 제목, 한쪽은 이슈를 고친 경우 둘 다 살린다)
  * - 지운 것은 양쪽 tombstones 를 합쳐서 어느 쪽에서든 지웠으면 지운다
  */
@@ -38,6 +38,7 @@ export function mergeData(base: AppData, incoming: AppData): AppData {
   return {
     tasks,
     projects: mergeById(base.projects, incoming.projects, dead),
+    notes: mergeById(base.notes, incoming.notes, dead),
     days,
     scratch: scratchNewer ? incoming.scratch : base.scratch,
     scratchUpdatedAt: scratchNewer ? incoming.scratchUpdatedAt : base.scratchUpdatedAt,

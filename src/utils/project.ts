@@ -16,7 +16,7 @@ export type TimelineEntry = {
 export type ProjectSummary = {
   project: Project;
   tasks: Task[];
-  /** 남은 할 일 — 마감일 가까운 순 (마감 없으면 뒤), 같으면 우선순위 */
+  /** 남은 할 일 — 끌어서 정한 순서, 정하지 않은 건 그 뒤에 마감일 가까운 순 (마감 없으면 뒤), 같으면 우선순위 */
   nextActions: Task[];
   done: Task[];
   overdue: number;
@@ -30,6 +30,7 @@ export function sortNextActions(tasks: Task[]): Task[] {
     .filter((t) => t.status !== 'done')
     .sort(
       (a, b) =>
+        (a.projectOrder ?? Infinity) - (b.projectOrder ?? Infinity) ||
         (a.due ?? '9999-99-99').localeCompare(b.due ?? '9999-99-99') ||
         priorityRank(a.priority) - priorityRank(b.priority) ||
         a.createdAt.localeCompare(b.createdAt),

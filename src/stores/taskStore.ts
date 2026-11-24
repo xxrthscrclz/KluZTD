@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-import type { AppData, DayEntry, Doc, Issue, Project, Status, Task } from '@/types/task';
+import type { AppData, DayEntry, Doc, Issue, Note, Project, Status, Task } from '@/types/task';
+import { todayIsoKey } from '@/utils/date';
 import { newId, nowIso } from '@/utils/id';
 import { orderBetween } from '@/utils/order';
 import { createTask, dayTasks, normalizeData, priorityRank, tasksIn } from '@/utils/task';
@@ -38,6 +39,10 @@ type TaskState = AppData & {
   toggleDone: (id: string) => void;
   /** from 날짜에 올려 두고 못 끝낸 할 일을 to 날짜로 옮긴다. 옮긴 개수 */
   carryOver: (from: string, to: string, ids?: string[]) => number;
+  /** 지난 날짜 체크리스트에 남은 미완료를 모두 today 로 (날이 바뀌면 자동) */
+  rollOver: (today: string) => number;
+  /** 프로젝트 Next Action 순서 — ids 순서대로 */
+  setProjectOrder: (ids: string[]) => void;
 
   /** ── 프로젝트 ── */
   addProject: (name: string) => string;
@@ -54,6 +59,12 @@ type TaskState = AppData & {
 
   /** 자유공간 */
   setScratch: (doc: Doc | null) => void;
+
+  /** ── 수첩 ── */
+  addNote: () => string;
+  updateNote: (id: string, patch: Partial<Pick<Note, 'title' | 'doc'>>) => void;
+  /** 바로 지운다 */
+  deleteNote: (id: string) => Undo;
 };
 
 const emptyDay = (): DayEntry => ({ issues: [] });
@@ -127,12 +138,19 @@ export const useTaskStore = create<TaskState>((set, get) => {
         ...patch,
         title: patch.title !== undefined ? patch.title : t.title,
         delegate: patch.delegate !== undefined ? patch.delegate?.trim() || null : t.delegate,
+        // 다른 프로젝트로 옮기면 그쪽에선 마감일 순부터
+        projectOrder: patch.projectId !== undefined && patch.projectId !== t.projectId ? null : t.projectOrder,
       })),
 
     moveTask: (id, status, order) =>
       patchTask(id, (t, at) => {
         const moved = applyStatus(t, status, at);
-        return { ...moved, order: order ?? (t.status === status ? t.order : naturalOrder(get().tasks, status, moved)) };
+        const next = { ...moved, order: order ?? (t.status === status ? t.order : naturalOrder(get().tasks, status, moved)) };
+        // 진행 중으로 옮기면 오늘 체크리스트로
+        const today = todayIsoKey();
+        if (status !== 'doing' || t.status === 'doing' || t.plannedOn === today) return next;
+        const list = dayTasks(get().tasks, today);
+        return { ...next, plannedOn: today, dayOrder: orderBetween(list[list.length - 1]?.dayOrder, undefined) };
       }),
 
     deleteTask: (id) => {
@@ -197,6 +215,36 @@ export const useTaskStore = create<TaskState>((set, get) => {
       return pending.length;
     },
 
+    setProjectOrder: (ids) => {
+      const orders = new Map(ids.map((id, i) => [id, (i + 1) * 1024]));
+      const at = nowIso();
+      set((s) => ({
+        tasks: s.tasks.map((t) => (orders.has(t.id) ? { ...t, projectOrder: orders.get(t.id) as number, updatedAt: at } : t)),
+        changeSeq: bump(s),
+      }));
+    },
+
+    rollOver: (today) => {
+      const stale = get()
+        .tasks.filter((t) => t.plannedOn && t.plannedOn < today && t.status !== 'done')
+        .sort((a, b) => (a.plannedOn as string).localeCompare(b.plannedOn as string) || a.dayOrder - b.dayOrder);
+      if (!stale.length) return 0;
+      const target = dayTasks(get().tasks, today);
+      let last = target[target.length - 1]?.dayOrder;
+      const orders = new Map(
+        stale.map((t) => {
+          last = orderBetween(last, undefined);
+          return [t.id, last] as const;
+        }),
+      );
+      const at = nowIso();
+      set((s) => ({
+        tasks: s.tasks.map((t) => (orders.has(t.id) ? { ...t, plannedOn: today, dayOrder: orders.get(t.id) as number, updatedAt: at } : t)),
+        changeSeq: bump(s),
+      }));
+      return stale.length;
+    },
+
     addProject: (name) => {
       const at = nowIso();
       const used = new Set(get().projects.map((p) => p.color));
@@ -253,5 +301,22 @@ export const useTaskStore = create<TaskState>((set, get) => {
     },
 
     setScratch: (doc) => set((s) => ({ scratch: doc, scratchUpdatedAt: nowIso(), changeSeq: bump(s) })),
+
+    addNote: () => {
+      const at = nowIso();
+      const note: Note = { id: newId(), title: '', doc: null, createdAt: at, updatedAt: at };
+      set((s) => ({ notes: [...s.notes, note], changeSeq: bump(s) }));
+      return note.id;
+    },
+    updateNote: (id, patch) => {
+      const at = nowIso();
+      set((s) => ({ notes: s.notes.map((n) => (n.id === id ? { ...n, ...patch, updatedAt: at } : n)), changeSeq: bump(s) }));
+    },
+    deleteNote: (id) => {
+      const note = get().notes.find((n) => n.id === id);
+      if (!note) return () => {};
+      set((s) => ({ notes: s.notes.filter((n) => n.id !== id), tombstones: bury(s.tombstones, [id], nowIso()), changeSeq: bump(s) }));
+      return () => set((s) => ({ notes: [...s.notes, note], tombstones: unbury(s.tombstones, [id]), changeSeq: bump(s) }));
+    },
   };
 });

@@ -1,7 +1,7 @@
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { History, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useMemo, useState, type ClipboardEvent } from 'react';
 
 import DayTaskRow from '@/components/daily/DayTaskRow';
@@ -14,23 +14,8 @@ import { orderBetween } from '@/utils/order';
 import { dayTasks } from '@/utils/task';
 
 /** 오늘 이전 14일 안에서, 올려 두고 못 끝낸 할 일이 있는 가장 최근 날 */
-function usePendingFrom(tasks: Task[], date: string, isToday: boolean) {
-  return useMemo(() => {
-    if (!isToday) return null;
-    const base = fromDateKey(date);
-    if (!base) return null;
-    for (let back = 1; back <= 14; back++) {
-      const key = toDateKey(addDays(base, -back));
-      const pending = dayTasks(tasks, key).filter((t) => t.status !== 'done' && t.title.trim());
-      if (pending.length) return { key, count: pending.length };
-    }
-    return null;
-  }, [tasks, date, isToday]);
-}
-
 type Props = {
   date: string;
-  isToday: boolean;
   /** 줄 메뉴의 '이슈 기록' — 아래 이슈 칸에 그 할 일과 연결된 새 이슈를 연다 */
   onIssue: (taskId: string) => void;
   /** 줄의 이슈 아이콘 — 연결된 이슈로 이동·강조만 (새로 만들지 않음) */
@@ -41,7 +26,7 @@ type Props = {
  * 그날 체크리스트. 한 줄 = 할 일 하나 = 상태 관리 카드 하나.
  * 여기서 적으면 상태 관리 «진행 예정»에도 생기고, 체크하면 «진행 완료».
  */
-export default function DayChecklist({ date, isToday, onIssue, onShowIssues }: Props) {
+export default function DayChecklist({ date, onIssue, onShowIssues }: Props) {
   const tasks = useTaskStore((s) => s.tasks);
   const day = useTaskStore((s) => s.days[date]);
   const addDayTask = useTaskStore((s) => s.addDayTask);
@@ -53,7 +38,6 @@ export default function DayChecklist({ date, isToday, onIssue, onShowIssues }: P
   const carryOver = useTaskStore((s) => s.carryOver);
   const [draft, setDraft] = useState('');
   const [focusId, setFocusId] = useState<string | null>(null);
-  const pendingFrom = usePendingFrom(tasks, date, isToday);
 
   const items = useMemo(() => dayTasks(tasks, date), [tasks, date]);
   const issueCount = useMemo(() => {
@@ -139,24 +123,6 @@ export default function DayChecklist({ date, isToday, onIssue, onShowIssues }: P
         ) : null}
         <div className="ml-auto hidden text-[0.7rem] whitespace-nowrap text-text-muted @lg:block">적으면 상태 관리에도 생겨요</div>
       </div>
-
-      {pendingFrom ? (
-        <button
-          type="button"
-          onClick={() => {
-            const n = carryOver(pendingFrom.key, date);
-            toast({ message: `${n}개를 오늘로 가져왔어요`, tone: 'success' }, 2400);
-          }}
-          data-testid="carry-over"
-          className="anim-rise flex items-center gap-2.5 rounded-xl border border-dashed border-warn/40 bg-warn-soft px-3.5 py-2.5 text-left text-sm text-warn hover:brightness-[0.98]"
-        >
-          <History className="size-4 flex-none" />
-          <div className="min-w-0 flex-1">
-            {formatDate(pendingFrom.key)}에 못 끝낸 {pendingFrom.count}개
-          </div>
-          <div className="flex-none font-semibold">오늘로 가져오기</div>
-        </button>
-      ) : null}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
         <SortableContext items={items.map((t) => t.id)} strategy={verticalListSortingStrategy}>

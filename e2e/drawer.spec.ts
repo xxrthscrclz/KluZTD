@@ -212,8 +212,12 @@ test('링크: javascript: 주소는 거르고 일반 주소는 https 로', async
   await page.keyboard.press('Enter');
   await expect(note.locator('a')).toHaveCount(0);
 
-  await note.locator('p').first().click({ clickCount: 3 });
-  await bubble.getByRole('button', { name: '링크' }).click();
+  // 직전 링크 창·막대가 사라지는 중(퇴장 모션)이면 선택이 풀릴 수 있어 링크 창이 열릴 때까지 다시 선택
+  await expect(async () => {
+    await note.locator('p').first().click({ clickCount: 3 });
+    await bubble.getByRole('button', { name: '링크' }).click({ timeout: 1500 });
+    await expect(page.getByPlaceholder('링크 주소 붙여넣기')).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 15_000 });
   await page.getByPlaceholder('링크 주소 붙여넣기').fill('docs.anthropic.com');
   await page.keyboard.press('Enter');
   await expect(note.locator('a')).toHaveAttribute('href', 'https://docs.anthropic.com');

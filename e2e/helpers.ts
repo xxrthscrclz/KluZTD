@@ -34,7 +34,10 @@ export function dateKey(offsetDays = 0) {
 /** 테스트 데이터 파일을 통째로 쓴다 (서버는 요청마다 파일을 읽는다) */
 type SeedDays = Record<string, { issues?: { id?: string; text: string; taskId?: string | null; resolved?: boolean }[] }>;
 
-export function writeData(tasks: SeedTask[] = [], rev = 0, extra: { days?: SeedDays; scratch?: unknown; projects?: SeedProject[] } = {}) {
+export type SeedNote = { id: string; title: string; text?: string; updatedMin?: number };
+const paraDoc = (text: string) => ({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] });
+
+export function writeData(tasks: SeedTask[] = [], rev = 0, extra: { days?: SeedDays; scratch?: unknown; projects?: SeedProject[]; notes?: SeedNote[] } = {}) {
   fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
   const full = tasks.map((t, i) => ({
     id: t.id ?? `seed-${i}`,
@@ -87,6 +90,13 @@ export function writeData(tasks: SeedTask[] = [], rev = 0, extra: { days?: SeedD
         ),
         scratch: extra.scratch ?? null,
         scratchUpdatedAt: new Date(0).toISOString(),
+        notes: (extra.notes ?? []).map((n) => ({
+          id: n.id,
+          title: n.title,
+          doc: n.text ? paraDoc(n.text) : null,
+          createdAt: iso(-90),
+          updatedAt: new Date(Date.now() + (n.updatedMin ?? 0) * 60_000).toISOString(),
+        })),
       },
       null,
       2,
@@ -106,6 +116,7 @@ export type FileTask = {
   plannedOn: string | null;
   dayOrder: number;
   projectId: string | null;
+  projectOrder: number | null;
   completedAt: string | null;
 };
 
@@ -118,6 +129,7 @@ export function readData(): {
   days: Record<string, { issues: FileDayIssue[] }>;
   tombstones: Record<string, string>;
   scratch: unknown;
+  notes: { id: string; title: string; doc: unknown; updatedAt: string }[];
 } {
   return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 }
@@ -172,10 +184,9 @@ export function fileDayTasks(key: string) {
     .sort((a, b) => a.dayOrder - b.dayOrder);
 }
 
-/** 자유공간 펼치기 — 데스크톱은 오른쪽 책갈피, 모바일은 상단 바 버튼 */
+/** 자유공간 펼치기 — 오른쪽 가장자리 책갈피 */
 export async function openScratch(page: Page) {
-  const mobile = (page.viewportSize()?.width ?? 1000) < 640;
-  await page.getByTestId(mobile ? 'scratch-toggle' : 'scratch-tab').click();
+  await page.getByTestId('scratch-tab').click();
   await expect(page.getByTestId('scratch-panel')).toHaveAttribute('data-open', 'true');
 }
 

@@ -60,6 +60,8 @@
  * 모든 반응은 0.5~1.0초, ease.
  * 키프레임은 transform 대신 translate/scale 개별 속성을 쓴다 —
  * 드래그 라이브러리가 인라인 transform 을 쓰는 요소에 붙여도 서로 덮어쓰지 않게.
+ * 들어오는 애니메이션은 fill-mode 를 backwards 로 — 끝난 뒤 translate 가 남으면
+ * 그 요소가 position:fixed 의 기준이 되어 드래그 중인 카드 좌표가 어긋난다.
  */
 :root {
   --kz-dur: 0.5s;
@@ -138,6 +140,12 @@
   to { opacity: 0; scale: 0.98; max-height: 0; margin: 0; padding-top: 0; padding-bottom: 0; }
 }
 
+/* 드래그로 들어 올린 카드 — 살짝 커지고 기울며 떠오른다 */
+@keyframes kz-lift {
+  from { scale: 1; rotate: 0deg; }
+  to { scale: 1.03; rotate: 1.5deg; }
+}
+
 /* 누를 때 살짝 눌렸다 돌아오기 */
 @keyframes kz-press {
   0% { scale: 1; }
@@ -158,21 +166,22 @@
   30% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent); }
 }
 
-.anim-fade { animation: kz-fade var(--kz-dur) var(--kz-ease) both; }
+.anim-fade { animation: kz-fade var(--kz-dur) var(--kz-ease) backwards; }
 .anim-fade-out { animation: kz-fade-out var(--kz-dur) var(--kz-ease) both; }
-.anim-pop { animation: kz-pop var(--kz-dur) var(--kz-ease) both; }
+.anim-pop { animation: kz-pop var(--kz-dur) var(--kz-ease) backwards; }
 .anim-pop-out { animation: kz-pop-out var(--kz-dur) var(--kz-ease) both; }
-.anim-rise { animation: kz-rise var(--kz-dur-md) var(--kz-ease) both; }
+.anim-rise { animation: kz-rise var(--kz-dur-md) var(--kz-ease) backwards; }
 .anim-sink { animation: kz-sink var(--kz-dur) var(--kz-ease) both; }
-.anim-slide-left { animation: kz-slide-left var(--kz-dur-md) var(--kz-ease) both; }
+.anim-slide-left { animation: kz-slide-left var(--kz-dur-md) var(--kz-ease) backwards; }
 .anim-slide-out-right { animation: kz-slide-out-right var(--kz-dur) var(--kz-ease) both; }
-.anim-from-left { animation: kz-from-left var(--kz-dur) var(--kz-ease) both; }
-.anim-from-right { animation: kz-from-right var(--kz-dur) var(--kz-ease) both; }
-.anim-sheet { animation: kz-sheet var(--kz-dur-md) var(--kz-ease) both; }
+.anim-from-left { animation: kz-from-left var(--kz-dur) var(--kz-ease) backwards; }
+.anim-from-right { animation: kz-from-right var(--kz-dur) var(--kz-ease) backwards; }
+.anim-sheet { animation: kz-sheet var(--kz-dur-md) var(--kz-ease) backwards; }
 .anim-sheet-out { animation: kz-sheet-out var(--kz-dur) var(--kz-ease) both; }
-.anim-page { animation: kz-page var(--kz-dur-md) var(--kz-ease) both; }
+.anim-page { animation: kz-page var(--kz-dur-md) var(--kz-ease) backwards; }
 .anim-collapse { animation: kz-collapse var(--kz-dur) var(--kz-ease) both; overflow: hidden; }
-.anim-check { animation: kz-check var(--kz-dur) var(--kz-ease) both; }
+.anim-lift { animation: kz-lift var(--kz-dur) var(--kz-ease) both; }
+.anim-check { animation: kz-check var(--kz-dur) var(--kz-ease) backwards; }
 .anim-flash { animation: kz-flash 1s var(--kz-ease) 0.15s 1; }
 .kz-press { animation: kz-press var(--kz-dur) var(--kz-ease); }
 

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { center, dateKey, liveFileTasks, open, waitSaved, writeData, openScratch } from './helpers';
+import { center, dateKey, liveFileTasks, open, waitSaved, writeData, openScratch, shot } from './helpers';
 
 test.beforeEach(() =>
   writeData([
@@ -83,6 +83,11 @@ test('모바일: 일일 관리 — 입력 중에만 서식 막대, 자유공간 
   expect(pb.width).toBeGreaterThanOrEqual(page.viewportSize()!.width - 1);
   await page.getByTestId('scratch-close').click();
   await expect(panel).toHaveAttribute('data-open', 'false');
+  // 상세가 열려 있어도 책갈피가 보인다
+  await page.getByTestId('day-item').first().getByTestId('row-info').click();
+  await page.getByRole('button', { name: '자세히 (메모)' }).click();
+  await expect(page.getByTestId('task-drawer')).toBeVisible();
+  await expect(page.getByTestId('scratch-tab')).toBeInViewport();
 });
 
 test('모바일: 보드 카드가 화면 위쪽 절반 안에서 시작한다', async ({ page }) => {
@@ -104,4 +109,17 @@ test('모바일: 달력 — 점으로 표시, 누르면 아래에 그날 자세�
   // 달력이 화면 밖으로 넘치지 않음
   const grid = (await page.getByTestId('calendar').boundingBox())!;
   expect(grid.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+});
+
+test('모바일 수첩: 목록 → 한 장 → 뒤로', async ({ page }) => {
+  writeData([], 0, { notes: [{ id: 'a', title: '장보기', text: '우유, 계란' }] });
+  await open(page, '/notebook');
+  await expect(page.getByTestId('note-page')).toHaveCount(0);
+  await page.getByTestId('note-item').click();
+  await expect(page.getByTestId('note-page')).toBeVisible();
+  await expect(page.getByTestId('note-list')).toHaveCount(0);
+  await expect(page.getByTestId('note-body')).toContainText('우유, 계란');
+  await shot(page, 'notebook-mobile');
+  await page.getByTestId('note-list-toggle').click();
+  await expect(page.getByTestId('note-list')).toBeVisible();
 });

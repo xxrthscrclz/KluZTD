@@ -2,16 +2,18 @@ import type { Priority, Status } from '@/types/task';
 import type { DueTone } from '@/utils/date';
 
 /** Tailwind 가 클래스를 찾을 수 있도록 문자열을 통째로 둔다 */
-export const statusTone: Record<Status, { dot: string; soft: string; text: string; ring: string }> = {
-  todo: { dot: 'bg-status-todo', soft: 'bg-status-todo-soft', text: 'text-status-todo', ring: 'ring-status-todo/40' },
-  doing: { dot: 'bg-status-doing', soft: 'bg-status-doing-soft', text: 'text-status-doing', ring: 'ring-status-doing/40' },
+export const statusTone: Record<Status, { dot: string; soft: string; text: string; ring: string; outline: string; line: string }> = {
+  todo: { dot: 'bg-status-todo', soft: 'bg-status-todo-soft', text: 'text-status-todo', ring: 'ring-status-todo/40', outline: 'outline-status-todo/45', line: 'bg-status-todo' },
+  doing: { dot: 'bg-status-doing', soft: 'bg-status-doing-soft', text: 'text-status-doing', ring: 'ring-status-doing/40', outline: 'outline-status-doing/45', line: 'bg-status-doing' },
   waiting: {
     dot: 'bg-status-waiting',
     soft: 'bg-status-waiting-soft',
     text: 'text-status-waiting',
     ring: 'ring-status-waiting/40',
+    outline: 'outline-status-waiting/45',
+    line: 'bg-status-waiting',
   },
-  done: { dot: 'bg-status-done', soft: 'bg-status-done-soft', text: 'text-status-done', ring: 'ring-status-done/40' },
+  done: { dot: 'bg-status-done', soft: 'bg-status-done-soft', text: 'text-status-done', ring: 'ring-status-done/40', outline: 'outline-status-done/45', line: 'bg-status-done' },
 };
 
 export const priorityTone: Record<Priority, { text: string; bg: string }> = {

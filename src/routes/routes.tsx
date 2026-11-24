@@ -9,6 +9,8 @@ const DailyPage = lazy(() => import('@/pages/daily'));
 const StatusPage = lazy(() => import('@/pages/status'));
 const CalendarPage = lazy(() => import('@/pages/calendar'));
 const ProjectsPage = lazy(() => import('@/pages/projects'));
+const NotebookPage = lazy(() => import('@/pages/notebook'));
+const ArchivePage = lazy(() => import('@/pages/archive'));
 
 /** 화면이 바뀔 때마다 0.6초 ease 로 떠오르며 들어온다 (같은 화면 안의 날짜 이동은 따로 좌우로) */
 function AnimatedRoutes() {
@@ -24,6 +26,9 @@ function AnimatedRoutes() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectsPage />} />
+          <Route path="/notebook" element={<NotebookPage />} />
+          <Route path="/notebook/:id" element={<NotebookPage />} />
+          <Route path="/archive" element={<ArchivePage />} />
           {/* 예전 주소 */}
           <Route path="/today/*" element={<Navigate to="/daily" replace />} />
           <Route path="/board" element={<Navigate to="/status" replace />} />

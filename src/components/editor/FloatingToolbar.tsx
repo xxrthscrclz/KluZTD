@@ -1,6 +1,8 @@
 import type { Editor } from '@tiptap/core';
 import { useEditorState } from '@tiptap/react';
 import {
+  AArrowDown,
+  AArrowUp,
   Bold,
   CheckSquare,
   ChevronsDownUp,
@@ -37,6 +39,7 @@ import { usePresence } from '@/hooks/usePresence';
 import { targetEditor, useEditorStore } from '@/stores/editorStore';
 
 import { safeHref } from './BubbleToolbar';
+import { currentSizeIndex, FONT_SIZES, stepFontSize } from './fontSize';
 import { insertMath } from './math';
 
 const POS_KEY = 'kluztd:toolbar';
@@ -156,6 +159,7 @@ export default function FloatingToolbar({ visible }: { visible: boolean }) {
             quote: e.isActive('blockquote'),
             codeBlock: e.isActive('codeBlock'),
             callout: e.isActive('callout'),
+            size: currentSizeIndex(e),
             canUndo: e.can().undo(),
             canRedo: e.can().redo(),
           }
@@ -295,6 +299,13 @@ export default function FloatingToolbar({ visible }: { visible: boolean }) {
           <Tool label="형광펜 (==)" active={state?.highlight} onRun={(e) => e.chain().focus().toggleHighlight().run()}>
             <Highlighter className={ic} />
           </Tool>
+          <Sep />
+          <Tool label={`글자 작게 (지금: ${FONT_SIZES[state?.size ?? 1].label})`} testId="tool-size-down" onRun={(e) => stepFontSize(e, -1)}>
+            <AArrowDown className={ic} />
+          </Tool>
+          <Tool label={`글자 크게 (지금: ${FONT_SIZES[state?.size ?? 1].label})`} testId="tool-size-up" onRun={(e) => stepFontSize(e, 1)}>
+            <AArrowUp className={ic} />
+          </Tool>
           <div ref={linkAnchor} className="flex">
             <Tool
               label="링크"
@@ -378,6 +389,7 @@ export default function FloatingToolbar({ visible }: { visible: boolean }) {
               setLinkOpen(false);
             }}
             placeholder="링크 주소 (선택한 글자에 걸림) — Enter"
+            data-no-arrows
             className="h-8 w-full rounded-md bg-bg-muted px-2 text-sm outline-none sm:w-64"
           />
         </div>

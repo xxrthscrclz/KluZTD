@@ -4,11 +4,13 @@ import Highlight from '@tiptap/extension-highlight';
 import { Mathematics } from '@tiptap/extension-mathematics';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { TableKit } from '@tiptap/extension-table';
+import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Placeholder } from '@tiptap/extensions';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import CodeBlockView from '../CodeBlockView';
+import { Arrows } from './Arrows';
 import { lowlight } from '../lowlight';
 import { openMathAt } from '../math';
 import { Callout } from './Callout';
@@ -39,6 +41,10 @@ function base(): AnyExtension[] {
       dropcursor: { color: 'var(--color-accent)', width: 2 },
     }),
     Highlight,
+    // 글자 크기 (선택한 글자에 font-size)
+    TextStyle,
+    FontSize,
+    Arrows,
     TaskList,
     TaskItem.configure({ nested: true }),
     TableKit.configure({ table: { resizable: false } }),

@@ -74,6 +74,7 @@ export default function MathPopover() {
           }}
           rows={kind === 'blockMath' ? 3 : 2}
           spellCheck={false}
+          data-no-arrows
           placeholder="LaTeX 입력 — 예: \frac{a}{b}"
           aria-label="LaTeX"
           className="w-full resize-y rounded-lg bg-bg-muted px-3 py-2 font-mono text-[0.82rem] leading-relaxed outline-none focus:bg-bg-surface focus:ring-2 focus:ring-accent/30"

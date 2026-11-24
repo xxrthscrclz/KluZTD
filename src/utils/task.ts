@@ -1,5 +1,5 @@
 import { PRIORITY, STATUS_ORDER } from '@/constants/status';
-import type { AppData, Doc, Issue, Priority, Project, Status, Task } from '@/types/task';
+import type { AppData, Doc, Issue, Note, Priority, Project, Status, Task } from '@/types/task';
 import { daysUntil, startOfToday, toDateKey } from '@/utils/date';
 import { docToText, isDocEmpty } from '@/utils/doc';
 import { newId, nowIso } from '@/utils/id';
@@ -35,12 +35,24 @@ export function normalizeTask(raw: Partial<Task>): Task {
     due: dateOrNull(raw.due),
     delegate: typeof raw.delegate === 'string' && raw.delegate.trim() ? raw.delegate.trim() : null,
     projectId: typeof raw.projectId === 'string' && raw.projectId ? raw.projectId : null,
+    projectOrder: typeof raw.projectOrder === 'number' && Number.isFinite(raw.projectOrder) ? raw.projectOrder : null,
     note: raw.note ?? null,
     activity: Array.isArray(raw.activity) ? raw.activity.filter((a) => STATUSES.has(a.from) && STATUSES.has(a.to)) : [],
     createdAt: raw.createdAt ?? now,
     updatedAt: raw.updatedAt ?? now,
     startedAt: raw.startedAt ?? null,
     completedAt: raw.completedAt ?? null,
+  };
+}
+
+export function normalizeNote(raw: Partial<Note>): Note {
+  const now = nowIso();
+  return {
+    id: typeof raw.id === 'string' && raw.id ? raw.id : newId(),
+    title: typeof raw.title === 'string' ? raw.title : '',
+    doc: raw.doc ?? null,
+    createdAt: raw.createdAt ?? now,
+    updatedAt: raw.updatedAt ?? now,
   };
 }
 
@@ -166,6 +178,7 @@ export function normalizeData(raw: RawData | null | undefined): AppData {
     days,
     scratch: raw?.scratch ?? legacyDump,
     scratchUpdatedAt: raw?.scratchUpdatedAt ?? (legacyDump ? (raw?.dumpUpdatedAt ?? EPOCH) : EPOCH),
+    notes: Array.isArray(raw?.notes) ? raw.notes.filter(alive).map(normalizeNote) : [],
     tombstones: dead,
   };
 }

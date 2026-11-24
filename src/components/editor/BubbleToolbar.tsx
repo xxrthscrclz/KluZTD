@@ -3,6 +3,8 @@ import { CellSelection } from '@tiptap/pm/tables';
 import { useEditorState } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import {
+  AArrowDown,
+  AArrowUp,
   Bold,
   Code,
   Highlighter,
@@ -18,6 +20,8 @@ import {
   TableRowsSplit,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+
+import { currentSizeIndex, FONT_SIZES, stepFontSize } from './fontSize';
 
 function ToolButton({
   label,
@@ -78,6 +82,7 @@ export function FormatBubble({ editor }: { editor: Editor }) {
       code: e.isActive('code'),
       highlight: e.isActive('highlight'),
       link: e.isActive('link'),
+      size: currentSizeIndex(e),
     }),
   });
 
@@ -111,6 +116,7 @@ export function FormatBubble({ editor }: { editor: Editor }) {
               if (e.key === 'Escape') setLinking(false);
             }}
             placeholder="링크 주소 붙여넣기"
+            data-no-arrows
             className="h-7 w-56 rounded-md bg-bg-muted px-2 text-sm outline-none"
           />
           <button
@@ -140,6 +146,16 @@ export function FormatBubble({ editor }: { editor: Editor }) {
           </ToolButton>
           <ToolButton label="형광펜 (==)" active={state.highlight} onClick={() => editor.chain().focus().toggleHighlight().run()}>
             <Highlighter className={ic} />
+          </ToolButton>
+          <div className="mx-0.5 h-5 w-px bg-border-default" />
+          <ToolButton label="글자 작게" onClick={() => stepFontSize(editor, -1)}>
+            <AArrowDown className={ic} />
+          </ToolButton>
+          <div className="min-w-[2.6rem] text-center text-[0.68rem] font-semibold text-text-muted" data-testid="font-size-label">
+            {FONT_SIZES[state.size].label}
+          </div>
+          <ToolButton label="글자 크게" onClick={() => stepFontSize(editor, 1)}>
+            <AArrowUp className={ic} />
           </ToolButton>
           <div className="mx-0.5 h-5 w-px bg-border-default" />
           <ToolButton

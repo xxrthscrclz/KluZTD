@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router
 
 import { useUrgentCount } from '@/components/daily/UrgentPanel';
 import BrandMark from '@/components/layout/BrandMark';
-import ScratchPanel, { ScratchToggle } from '@/components/layout/ScratchPanel';
+import ScratchPanel from '@/components/layout/ScratchPanel';
 import SyncBadge from '@/components/layout/SyncBadge';
 import ThemeSwitch, { ThemeToggle } from '@/components/layout/ThemeSwitch';
 import Toaster from '@/components/ui/Toaster';
@@ -21,7 +21,7 @@ function EditorChrome() {
   const location = useLocation();
   const [params] = useSearchParams();
   const scratchOpen = useUiStore((s) => s.scratchOpen);
-  const visible = location.pathname.startsWith('/daily') || Boolean(params.get('t')) || scratchOpen;
+  const visible = location.pathname.startsWith('/daily') || location.pathname.startsWith('/notebook') || Boolean(params.get('t')) || scratchOpen;
   if (!visible) return null;
   return (
     <Suspense fallback={null}>
@@ -86,7 +86,7 @@ function Sidebar() {
           <div className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
             <div className="font-mono">N</div>
             <div>할 일 추가</div>
-            <div className="font-mono">1–4</div>
+            <div className="font-mono">1–5</div>
             <div>화면 이동</div>
             <div className="font-mono">M</div>
             <div>자유공간</div>
@@ -108,11 +108,10 @@ function MobileTopBar() {
     <div role="banner" className="pt-safe sticky top-0 z-30 flex flex-none items-center justify-between gap-3 border-b border-border-default bg-bg-page/90 px-4 backdrop-blur-xl sm:hidden">
       <div className="flex h-12 items-center gap-2.5">
         <BrandMark size={24} withName={false} />
-        <div className="text-base font-bold">{current?.label ?? 'KluZTD'}</div>
+        <div className="text-base font-bold">{current?.label ?? (location.pathname.startsWith('/archive') ? '아카이브' : 'KluZTD')}</div>
       </div>
       <div className="flex items-center gap-3">
         <SyncBadge compact />
-        <ScratchToggle />
         <ThemeToggle />
       </div>
     </div>
@@ -127,7 +126,7 @@ function BottomNav() {
       aria-label="하단 메뉴"
       className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-border-default bg-bg-surface/92 backdrop-blur-xl sm:hidden"
     >
-      <div className="grid h-[3.75rem] grid-cols-4">
+      <div className="grid h-[3.75rem] grid-cols-5">
         {NAV.map((item) => (
           <NavLink
             key={item.path}

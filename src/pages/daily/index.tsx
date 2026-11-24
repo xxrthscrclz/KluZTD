@@ -66,7 +66,7 @@ export default function DailyPage() {
         <div key={date} className={`flex min-w-0 flex-col gap-5 @4xl:order-1 ${slide}`}>
           {/* 체크리스트 = 그날 올린 할 일 (상태 관리 카드와 같은 것) */}
           <div className="rounded-2xl bg-bg-surface px-3 py-4 shadow-card sm:px-5">
-            <DayChecklist date={date} isToday={isToday} onIssue={issueFor} onShowIssues={showIssues} />
+            <DayChecklist date={date} onIssue={issueFor} onShowIssues={showIssues} />
             {/* 오늘은 빨간 알림이 같은 걸 보여 주므로 다른 날짜에서만 */}
             {!isToday ? <DayDueSection date={date} /> : null}
           </div>

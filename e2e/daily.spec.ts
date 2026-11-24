@@ -45,7 +45,8 @@ test('상태 관리에서 바꾸면 체크리스트에도 그대로 (같은 할 
   await page.getByRole('option', { name: /진행 중/ }).click();
   await page.getByTestId('drawer-close').click();
   await open(page, '/daily');
-  await expect(page.getByTestId('day-item')).toContainText('진행 중');
+  await page.getByTestId('row-info').click();
+  await expect(page.getByTestId('row-info-card').getByTestId('field-status')).toContainText('진행 중');
 });
 
 test('상태 관리의 할 일을 체크리스트로 — 상세의 «체크리스트» 날짜', async ({ page }) => {
@@ -59,32 +60,32 @@ test('상태 관리의 할 일을 체크리스트로 — 상세의 «체크리�
   await expect(page.getByTestId('day-item').getByRole('textbox', { name: '할 일' })).toHaveValue('보드에서 만든 일');
 });
 
-test('체크리스트 줄에 마감일·담당자·프로젝트를 바로 넣는다', async ({ page }) => {
+test('체크리스트 줄은 체크·제목만, 나머지는 ⓘ 정보 카드에서', async ({ page }) => {
   writeData([{ id: 'c', title: '정보 넣을 일', status: 'todo', plannedOn: dateKey(0) }]);
   await open(page, '/daily');
   const row = page.getByTestId('day-item').first();
-  await row.hover();
+  // 줄에는 마감·담당자·프로젝트 칩이 없다
+  await expect(row.getByTestId('field-due')).toHaveCount(0);
+  await expect(row.getByTestId('field-delegate')).toHaveCount(0);
 
-  await row.getByTestId('field-due').click();
+  await row.getByTestId('row-info').click();
+  const card = page.getByTestId('row-info-card');
+  await card.getByTestId('field-due').click();
   await page.getByTestId('date-picker').getByRole('button', { name: '내일' }).click();
-  await expect(row).toContainText('내일');
+  await expect(card).toBeVisible(); // 안쪽 달력을 써도 카드는 그대로
+  await expect(card.getByTestId('field-due')).toContainText('내일');
 
-  await row.hover();
-  await row.getByTestId('field-delegate').click();
+  await card.getByTestId('field-delegate').click();
   await page.getByPlaceholder('누가 맡나요? (이름 입력)').fill('김매니저');
   await page.keyboard.press('Enter');
-  await expect(row).toContainText('김매니저');
+  await expect(card.getByTestId('field-delegate')).toContainText('김매니저');
 
-  // 프로젝트: 이름을 적고 Enter → 새 프로젝트가 생기며 연결
-  await row.hover();
-  await row.getByTestId('field-project').click();
+  await card.getByTestId('field-project').click();
   await page.getByPlaceholder('프로젝트 찾기 또는 새로 만들기').fill('국민대 캠타');
   await page.keyboard.press('Enter');
-  await expect(row).toContainText('국민대 캠타');
+  await expect(card.getByTestId('field-project')).toContainText('국민대 캠타');
 
-  // 메모는 상세에서
-  await row.hover();
-  await row.getByRole('button', { name: '자세히 (메모·이슈)' }).click();
+  await card.getByRole('button', { name: '자세히 (메모)' }).click();
   await page.getByTestId('note-editor').click();
   await page.keyboard.type('OT 자료 준비');
   await page.getByTestId('drawer-title').click();
@@ -96,6 +97,21 @@ test('체크리스트 줄에 마감일·담당자·프로젝트를 바로 넣는
   const project = readData().projects.find((p) => p.name === '국민대 캠타')!;
   expect(t.projectId).toBe(project.id);
   expect(JSON.stringify(t.note)).toContain('OT 자료 준비');
+  // 정보가 있으면 ⓘ 에 점
+  await expect(row.getByTestId('row-info-dot')).toHaveCount(1);
+});
+
+test('정보 카드: Esc 는 안쪽 팝업부터 하나씩 닫는다', async ({ page }) => {
+  writeData([{ id: 'e', title: 'Esc 확인', status: 'todo', plannedOn: dateKey(0) }]);
+  await open(page, '/daily');
+  await page.getByTestId('row-info').click();
+  await page.getByTestId('row-info-card').getByTestId('field-due').click();
+  await expect(page.getByTestId('date-picker')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('date-picker')).toHaveCount(0);
+  await expect(page.getByTestId('row-info-card')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('row-info-card')).toHaveCount(0);
 });
 
 test('여러 줄 붙여넣기 → 한꺼번에, 빈 줄 Backspace 삭제', async ({ page }) => {
@@ -165,8 +181,7 @@ test('이슈: 체크리스트 아래에 적고, 할 일에 연결된다', async 
   await open(page, '/daily');
   const issues = page.getByTestId('day-issues');
   const row = page.getByTestId('day-item').first();
-  await row.hover();
-  await row.getByRole('button', { name: '더 보기' }).click();
+  await row.getByTestId('row-info').click();
   await page.getByRole('button', { name: /^이슈 기록/ }).click();
   await page.keyboard.type('사진 해상도가 낮아서 다시 받아야 함');
   const entry = issues.getByTestId('issue-entry').filter({ hasText: '해상도' });
@@ -185,32 +200,41 @@ test('이슈: 체크리스트 아래에 적고, 할 일에 연결된다', async 
   expect(day.issues.find((i) => JSON.stringify(i.doc).includes('회의'))?.taskId).toBe('r2');
 });
 
-test('어제 못 끝낸 것 가져오기 · 다음 날로 미루기 · 체크리스트에서 빼기', async ({ page }) => {
+test('지난날 못 끝낸 건 자동으로 오늘로 · 다음 날로 미루기 · 체크리스트에서 빼기', async ({ page }) => {
   writeData([
     { id: 'y1', title: '어제 끝낸 것', status: 'done', plannedOn: dateKey(-1) },
     { id: 'y2', title: '어제 못 한 것', status: 'todo', plannedOn: dateKey(-1) },
+    { id: 'y4', title: '그저께 대기', status: 'waiting', plannedOn: dateKey(-2) },
     { id: 'y3', title: '오늘 뺄 것', status: 'todo', plannedOn: dateKey(0) },
   ]);
   await open(page, '/daily');
-  await page.getByTestId('carry-over').click();
-  await expect(page.getByTestId('carry-over')).toBeHidden();
+  // 켜자마자 지난 체크리스트의 미완료가 오늘로 (끝낸 건 그날에 남음)
+  await expect(page.getByText('못 끝낸 2개를 오늘 체크리스트로 옮겼어요')).toBeVisible();
+  await expect(page.getByTestId('day-item')).toHaveCount(3);
+  await waitSaved(page);
+  expect(Object.fromEntries(liveFileTasks().map((t) => [t.id, t.plannedOn]))).toEqual({
+    y1: dateKey(-1),
+    y2: dateKey(0),
+    y4: dateKey(0),
+    y3: dateKey(0),
+  });
+  await page.getByTestId('day-item').filter({ has: page.locator('input[value="그저께 대기"]') }).getByTestId('row-info').click();
+  await page.getByRole('button', { name: /체크리스트에서 빼기/ }).click();
   await expect(page.getByTestId('day-item')).toHaveCount(2);
 
   const out = page.getByTestId('day-item').filter({ has: page.locator('input[value="오늘 뺄 것"]') });
-  await out.hover();
-  await out.getByRole('button', { name: '더 보기' }).click();
+  await out.getByTestId('row-info').click();
   await page.getByRole('button', { name: /체크리스트에서 빼기/ }).click();
   await expect(page.getByTestId('day-item')).toHaveCount(1);
 
   const row = page.getByTestId('day-item').first();
-  await row.hover();
-  await row.getByRole('button', { name: '더 보기' }).click();
+  await row.getByTestId('row-info').click();
   await page.getByRole('button', { name: '다음 날로 미루기' }).click();
   await expect(page.getByTestId('day-item')).toHaveCount(0);
 
   await waitSaved(page);
   const byId = Object.fromEntries(liveFileTasks().map((t) => [t.id, t.plannedOn]));
-  expect(byId).toEqual({ y1: dateKey(-1), y2: dateKey(1), y3: null });
+  expect(byId).toEqual({ y1: dateKey(-1), y2: dateKey(1), y3: null, y4: null });
   // 뺀 것은 상태 관리에 남아 있다
   await open(page, '/status');
   await expect(page.getByTestId('column-todo')).toContainText('오늘 뺄 것');
@@ -220,8 +244,7 @@ test('삭제는 바로 날린다 — 줄을 지우면 상태 관리에서도 사
   writeData([{ id: 'gone', title: '지울 줄', status: 'todo', plannedOn: dateKey(0) }]);
   await open(page, '/daily');
   const row = page.getByTestId('day-item').first();
-  await row.hover();
-  await row.getByRole('button', { name: '더 보기' }).click();
+  await row.getByTestId('row-info').click();
   await page.getByRole('button', { name: '삭제' }).click();
   await expect(page.getByTestId('day-item')).toHaveCount(0);
   await waitSaved(page);

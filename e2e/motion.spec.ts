@@ -110,8 +110,7 @@ test('체크리스트 줄: 추가되면 떠오르고, 지우면 접히며 사라
   await page.keyboard.press('Enter');
   const row = page.getByTestId('day-item').first();
   expect((await animationOf(row)).name).toBe('kz-rise');
-  await row.hover();
-  await row.getByRole('button', { name: '더 보기' }).click();
+  await row.getByTestId('row-info').click();
   await page.getByRole('button', { name: '삭제' }).click();
   await expect(row).toHaveClass(/anim-collapse/);
   await expect(page.getByTestId('day-item')).toHaveCount(0, { timeout: 2000 });
@@ -123,4 +122,16 @@ test('날짜를 넘기면 좌우로 밀려 들어온다', async ({ page }) => {
   await expect(page.locator('.anim-from-right')).toHaveCount(1);
   await page.getByRole('button', { name: '전날' }).click();
   await expect(page.locator('.anim-from-left')).toHaveCount(1);
+});
+
+test('들어오는 애니메이션은 끝나면 transform 을 남기지 않는다 (fixed 좌표 기준이 바뀌지 않게)', async ({ page }) => {
+  await open(page, '/status');
+  await page.waitForTimeout(1200);
+  const leftovers = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('[class*="anim-"]'))
+      .filter((el) => !/anim-(lift|.*-out|sink|collapse)/.test(el.className))
+      .map((el) => getComputedStyle(el).translate)
+      .filter((t) => t !== 'none'),
+  );
+  expect(leftovers).toEqual([]);
 });

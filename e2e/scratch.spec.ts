@@ -88,9 +88,27 @@ for (const width of [1100, 1280, 1440]) {
     expect(row.x + row.width).toBeLessThanOrEqual(panel.x + 1);
 
     // 상세를 열면 자유공간 왼쪽에 나란히
-    await page.getByTestId('day-item').getByRole('button', { name: '자세히 (메모·이슈)' }).click({ force: true });
+    await page.getByTestId('row-info').click();
+    await page.getByRole('button', { name: '자세히 (메모)' }).click();
     const drawer = (await page.getByTestId('task-drawer').boundingBox())!;
     expect(drawer.x + drawer.width).toBeLessThanOrEqual(panel.x + 1);
     await expect(page.getByTestId('task-drawer').getByTestId('field-delegate')).toBeInViewport();
   });
 }
+
+test('책갈피는 항상 맨 앞 — 상세가 열려 있어도 누를 수 있고, 펼치면 패널 가장자리를 따라간다', async ({ page }) => {
+  await open(page, '/status');
+  await page.getByTestId('task-card').click();
+  await expect(page.getByTestId('task-drawer')).toBeVisible();
+  const tab = page.getByTestId('scratch-tab');
+  await tab.click(); // 가려져 있으면 여기서 실패
+  await expect(page.getByTestId('scratch-panel')).toHaveAttribute('data-open', 'true');
+  const panel = (await page.getByTestId('scratch-panel').boundingBox())!;
+  await expect.poll(async () => {
+    const b = (await tab.boundingBox())!;
+    return Math.round(b.x + b.width - panel.x);
+  }).toBeLessThanOrEqual(2);
+  // 책갈피를 다시 누르면 접힌다
+  await tab.click();
+  await expect(page.getByTestId('scratch-panel')).toHaveAttribute('data-open', 'false');
+});

@@ -4,7 +4,9 @@ import { ApiRequestError } from '@/api/errors';
 import type { RemoteData } from '@/api/types';
 import { useSyncStore } from '@/stores/syncStore';
 import { useTaskStore } from '@/stores/taskStore';
+import { toast } from '@/stores/toastStore';
 import type { AppData } from '@/types/task';
+import { todayIsoKey } from '@/utils/date';
 import { mergeData, purgeTombstones } from '@/utils/merge';
 import { normalizeData } from '@/utils/task';
 
@@ -34,8 +36,8 @@ const status = (patch: Parameters<ReturnType<typeof useSyncStore.getState>['set'
   useSyncStore.getState().set(patch);
 
 function snapshot(): AppData {
-  const { tasks, projects, days, scratch, scratchUpdatedAt, tombstones } = useTaskStore.getState();
-  return { tasks, projects, days, scratch, scratchUpdatedAt, tombstones };
+  const { tasks, projects, days, scratch, scratchUpdatedAt, notes, tombstones } = useTaskStore.getState();
+  return { tasks, projects, days, scratch, scratchUpdatedAt, notes, tombstones };
 }
 
 const isDirty = () => useTaskStore.getState().changeSeq !== savedSeq;
@@ -184,4 +186,19 @@ export async function startSync(): Promise<void> {
     else writeCache();
   });
   window.addEventListener('pagehide', writeCache);
+
+  installRollOver();
+}
+
+/** 날이 바뀌면 지난 체크리스트의 못 끝낸 일을 오늘로 — 켤 때, 돌아올 때, 1분마다 확인 */
+function installRollOver() {
+  const run = () => {
+    const n = useTaskStore.getState().rollOver(todayIsoKey());
+    if (n) toast({ message: `못 끝낸 ${n}개를 오늘 체크리스트로 옮겼어요`, tone: 'success' }, 3000);
+  };
+  run();
+  setInterval(run, 60_000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') run();
+  });
 }

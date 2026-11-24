@@ -24,6 +24,14 @@ type Props = {
 
 const NO_REFS: RefObject<HTMLElement | null>[] = [];
 
+/**
+ * 열려 있는 팝오버 순서 (나중에 연 게 위).
+ * 정보 카드 안의 날짜 고르기처럼 팝오버 안에서 또 팝오버를 열 때,
+ * 안쪽을 눌러도 바깥이 닫히지 않고, Esc 는 맨 위 것만 닫히게 한다.
+ */
+const openStack: number[] = [];
+let nextPopoverId = 1;
+
 /** 앵커 옆에 붙는 떠 있는 패널. 바깥 클릭·Esc 로 닫힌다. */
 export default function Popover({
   anchorRef,
@@ -44,6 +52,8 @@ export default function Popover({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const { mounted, leaving } = usePresence(open);
+  const idRef = useRef(0);
+  if (!idRef.current) idRef.current = nextPopoverId++;
 
   useLayoutEffect(() => {
     if (!mounted || asSheet) return;
@@ -77,21 +87,28 @@ export default function Popover({
 
   useEffect(() => {
     if (!open) return;
+    const myId = idRef.current;
+    openStack.push(myId);
     const onDown = (e: PointerEvent) => {
       const t = e.target as Node;
       if (panelRef.current?.contains(t) || anchorRef.current?.contains(t)) return;
       if (ignoreRefs.some((r) => r.current?.contains(t))) return;
+      // 나보다 나중에 연(안쪽) 팝오버를 누른 거면 닫지 않는다
+      const inner = (t as HTMLElement).closest?.('[data-kz-popover]') as HTMLElement | null;
+      const innerId = Number(inner?.dataset.kzPopover ?? 0);
+      if (innerId && openStack.indexOf(innerId) > openStack.indexOf(myId)) return;
       onCloseRef.current();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onCloseRef.current();
-      }
+      if (e.key !== 'Escape' || openStack[openStack.length - 1] !== myId) return;
+      e.stopPropagation();
+      onCloseRef.current();
     };
     document.addEventListener('pointerdown', onDown, true);
     document.addEventListener('keydown', onKey, true);
     return () => {
+      const i = openStack.indexOf(myId);
+      if (i >= 0) openStack.splice(i, 1);
       document.removeEventListener('pointerdown', onDown, true);
       document.removeEventListener('keydown', onKey, true);
     };
@@ -102,7 +119,7 @@ export default function Popover({
   if (asSheet) {
     return (
       <Portal>
-        <div className={`fixed inset-0 z-[70] flex flex-col justify-end ${leaving ? 'pointer-events-none' : ''}`}>
+        <div data-kz-popover={idRef.current} className={`fixed inset-0 z-[70] flex flex-col justify-end ${leaving ? 'pointer-events-none' : ''}`}>
           <div className={`absolute inset-0 bg-bg-overlay ${leaving ? 'anim-fade-out' : 'anim-fade'}`} onPointerDown={() => onClose()} />
           <div
             ref={panelRef}
@@ -125,6 +142,7 @@ export default function Popover({
       <div
         ref={panelRef}
         role="dialog"
+        data-kz-popover={idRef.current}
         style={{ left: pos.x, top: pos.y, visibility: pos.placed ? 'visible' : 'hidden' }}
         className={`fixed z-[70] flex flex-col overflow-y-auto rounded-xl border border-border-default bg-bg-surface shadow-pop ${
           leaving ? 'anim-pop-out' : pos.placed ? 'anim-pop' : ''

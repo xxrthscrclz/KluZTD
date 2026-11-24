@@ -1,6 +1,5 @@
 import {
   DndContext,
-  DragOverlay,
   KeyboardSensor,
   MouseSensor,
   pointerWithin,
@@ -10,6 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
+import OverlayPortal from '@/components/ui/OverlayPortal';
 import { DROP_ANIMATION } from '@/lib/motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -170,13 +170,13 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <DragOverlay dropAnimation={DROP_ANIMATION}>
+        <OverlayPortal dropAnimation={DROP_ANIMATION}>
           {dragTask ? (
             <div className="w-40">
               <ScheduleChipBody task={dragTask} overlay kind={dragKind} />
             </div>
           ) : null}
-        </DragOverlay>
+        </OverlayPortal>
       </DndContext>
     </div>
   );

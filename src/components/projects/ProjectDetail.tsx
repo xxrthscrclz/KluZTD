@@ -1,4 +1,8 @@
-import { ArrowLeft, CheckCircle2, CircleAlert, Play, Plus, Trash2 } from 'lucide-react';
+import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { ArrowLeft, CheckCircle2, CircleAlert, GripVertical, Play, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { DelegateChip, DueChip, PROJECT_DOTS, StatusBadge } from '@/components/ui/Badges';
@@ -6,8 +10,10 @@ import IconButton from '@/components/ui/IconButton';
 import { useDraftText } from '@/hooks/useDraftText';
 import { useTaskParam } from '@/hooks/useTaskParam';
 import { announceDelete } from '@/lib/feedback';
+import { SORT_TRANSITION } from '@/lib/motion';
 import { useTaskStore } from '@/stores/taskStore';
 import { dayHeading, formatDate, formatTime, todayIsoKey } from '@/utils/date';
+import type { Task } from '@/types/task';
 import { groupByDay, type ProjectSummary, type TimelineEntry } from '@/utils/project';
 
 function Check({ done, onClick, label }: { done: boolean; onClick: () => void; label: string }) {
@@ -59,18 +65,66 @@ function TimelineRow({ entry, onOpen }: { entry: TimelineEntry; onOpen: (id: str
   );
 }
 
-/** 프로젝트 하나 — 남은 Next Action(마감일 순)과 지금까지 한 일 */
+/** Next Action 한 줄 — 손잡이로 끌어서 순서 바꾸기 */
+function NextActionRow({ task: t, today, onDone, onOpen }: { task: Task; today: string; onDone: () => void; onOpen: () => void }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: t.id, transition: SORT_TRANSITION });
+  const overdue = t.due ? t.due < today : false;
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      data-testid="project-next-item"
+      className={`group/item anim-rise flex min-h-10 items-center gap-1.5 rounded-lg pr-1 hover:bg-bg-hover ${isDragging ? 'relative z-10 bg-bg-surface opacity-80 shadow-drag' : ''}`}
+    >
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        aria-label="끌어서 순서 바꾸기"
+        data-testid="project-next-grip"
+        className="grid h-8 w-5 flex-none cursor-grab touch-none place-items-center text-text-muted opacity-0 group-hover/item:opacity-100 focus-visible:opacity-100"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="size-3.5" />
+      </button>
+      <Check done={false} label={`«${t.title}» 완료`} onClick={onDone} />
+      <button type="button" onClick={onOpen} className="ml-1 flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-left">
+        <div className={`min-w-0 flex-1 truncate text-sm ${overdue ? 'font-semibold text-danger' : ''}`}>{t.title}</div>
+        {t.delegate ? <DelegateChip name={t.delegate} /> : null}
+        {t.plannedOn ? (
+          <div className="text-[0.7rem] text-text-muted">{t.plannedOn === today ? '오늘 체크리스트' : `${formatDate(t.plannedOn)} 체크리스트`}</div>
+        ) : null}
+        {t.due ? <DueChip due={t.due} /> : <div className="text-[0.7rem] text-text-muted">마감 없음</div>}
+        <StatusBadge status={t.status} />
+      </button>
+    </div>
+  );
+}
+
+/** 프로젝트 하나 — 남은 Next Action(끌어서 정한 순서, 그 외 마감일 순)과 지금까지 한 일 */
 export default function ProjectDetail({ summary, onBack }: { summary: ProjectSummary; onBack?: () => void }) {
   const updateProject = useTaskStore((s) => s.updateProject);
   const deleteProject = useTaskStore((s) => s.deleteProject);
   const addTask = useTaskStore((s) => s.addTask);
   const toggleDone = useTaskStore((s) => s.toggleDone);
+  const setProjectOrder = useTaskStore((s) => s.setProjectOrder);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const { open } = useTaskParam();
   const { project } = summary;
   const name = useDraftText(project.name, (next) => updateProject(project.id, { name: next }));
   const [draft, setDraft] = useState('');
   const total = summary.tasks.length;
   const today = todayIsoKey();
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const ids = summary.nextActions.map((t) => t.id);
+    setProjectOrder(arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id))));
+  };
 
   const add = () => {
     if (!draft.trim()) return;
@@ -137,25 +191,17 @@ export default function ProjectDetail({ summary, onBack }: { summary: ProjectSum
       <div className="flex flex-col gap-2 rounded-2xl bg-bg-surface p-4 shadow-card" data-testid="project-next">
         <div className="flex items-center gap-2">
           <div className="text-base font-bold">Next Action</div>
-          <div className="text-xs text-text-muted">마감일 가까운 순</div>
+          <div className="text-xs text-text-muted">끌어서 순서 변경 · 정하지 않은 건 마감일 순</div>
         </div>
-        {summary.nextActions.map((t) => {
-          const overdue = t.due ? t.due < today : false;
-          return (
-            <div key={t.id} data-testid="project-next-item" className="anim-rise flex min-h-10 items-center gap-2.5 rounded-lg px-1 hover:bg-bg-hover">
-              <Check done={false} label={`«${t.title}» 완료`} onClick={() => toggleDone(t.id)} />
-              <button type="button" onClick={() => open(t.id)} className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-left">
-                <div className={`min-w-0 flex-1 truncate text-sm ${overdue ? 'font-semibold text-danger' : ''}`}>{t.title}</div>
-                {t.delegate ? <DelegateChip name={t.delegate} /> : null}
-                {t.plannedOn ? (
-                  <div className="text-[0.7rem] text-text-muted">{t.plannedOn === today ? '오늘 체크리스트' : `${formatDate(t.plannedOn)} 체크리스트`}</div>
-                ) : null}
-                {t.due ? <DueChip due={t.due} /> : <div className="text-[0.7rem] text-text-muted">마감 없음</div>}
-                <StatusBadge status={t.status} />
-              </button>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+          <SortableContext items={summary.nextActions.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col">
+              {summary.nextActions.map((t) => (
+                <NextActionRow key={t.id} task={t} today={today} onDone={() => toggleDone(t.id)} onOpen={() => open(t.id)} />
+              ))}
             </div>
-          );
-        })}
+          </SortableContext>
+        </DndContext>
         {!summary.nextActions.length ? <div className="px-1 py-2 text-sm text-text-muted">남은 할 일이 없어요</div> : null}
         <div className="flex min-h-10 items-center gap-2 rounded-lg px-1 text-text-muted focus-within:text-text-primary">
           <Plus className="size-[1.15rem] flex-none" />

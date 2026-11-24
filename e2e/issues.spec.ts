@@ -12,15 +12,14 @@ test.beforeEach(() =>
 test('일일 관리에서 연결한 이슈가 할 일 상세·카드에도 보인다 (같은 이슈)', async ({ page }) => {
   await open(page, '/daily');
   const row = page.getByTestId('day-item').first();
-  await row.hover();
-  await row.getByRole('button', { name: '더 보기' }).click();
+  await row.getByTestId('row-info').click();
   await page.getByRole('button', { name: /^이슈 기록/ }).click();
   await page.keyboard.type('택배사 파업으로 지연');
   await page.getByTestId('day-add').click();
 
   // 상세에서 같은 이슈
-  await row.hover();
-  await row.getByRole('button', { name: '자세히 (메모·이슈)' }).click();
+  await row.getByTestId('row-info').click();
+  await page.getByRole('button', { name: '자세히 (메모)' }).click();
   const drawerIssues = page.getByTestId('task-drawer').getByTestId('issue-entry');
   await expect(drawerIssues).toHaveCount(1);
   await expect(drawerIssues).toContainText('택배사 파업으로 지연');

@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarDays, FolderKanban, KanbanSquare, type LucideIcon } from 'lucide-react';
+import { CalendarCheck, CalendarDays, FolderKanban, KanbanSquare, NotebookPen, type LucideIcon } from 'lucide-react';
 
 export type NavItem = {
   path: string;
@@ -15,4 +15,5 @@ export const NAV: NavItem[] = [
   { path: '/status', label: '상태 관리', hint: '진행 예정·진행 중·대기·완료', icon: KanbanSquare, key: '2' },
   { path: '/calendar', label: '달력', hint: '한 달에 뭘 했고 뭐가 잡혀 있는지', icon: CalendarDays, key: '3' },
   { path: '/projects', label: '프로젝트', hint: '프로젝트별 한 일과 Next Action', icon: FolderKanban, key: '4' },
+  { path: '/notebook', label: '수첩', hint: '자유롭게 쓰는 페이지들', icon: NotebookPen, key: '5' },
 ];

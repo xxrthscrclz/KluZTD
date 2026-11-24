@@ -49,6 +49,8 @@ export type Task = {
   /** 담당자 (위임 대상) */
   delegate: string | null;
   projectId: string | null;
+  /** 프로젝트 Next Action 에서 끌어서 정한 순서 (없으면 마감일 순) */
+  projectOrder: number | null;
   note: Doc | null;
   activity: Activity[];
   createdAt: string;
@@ -72,6 +74,15 @@ export type DayEntry = {
   issues: Issue[];
 };
 
+/** 수첩 한 장 — 자유공간처럼 자유롭게 쓰는 페이지 */
+export type Note = {
+  id: string;
+  title: string;
+  doc: Doc | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 /** data/kluztd.json 의 내용 */
 export type AppData = {
   tasks: Task[];
@@ -81,6 +92,8 @@ export type AppData = {
   /** 날짜와 상관없는 자유공간 (어느 화면에서나 오른쪽 책갈피) */
   scratch: Doc | null;
   scratchUpdatedAt: string;
+  /** 수첩 페이지들 */
+  notes: Note[];
   /**
    * 지운 것의 id → 지운 시각. 내용은 바로 지우고 id 만 남겨서
    * 다른 탭/기기의 오래된 사본과 병합할 때 되살아나지 않게 한다 (30일 뒤 정리).

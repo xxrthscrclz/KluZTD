@@ -40,23 +40,26 @@ export default function ScratchPanel() {
 
   return (
     <Portal>
-      {!isMobile ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="자유공간 펼치기 (M)"
-          title="자유공간 (M)"
-          data-testid="scratch-tab"
-          tabIndex={open ? -1 : 0}
-          aria-hidden={open}
-          className={`fixed top-28 right-0 z-[57] flex flex-col items-center gap-1.5 rounded-l-xl border border-r-0 border-border-default bg-bg-surface px-1.5 py-3 text-text-secondary shadow-pop transition-[translate,opacity,padding,color] duration-500 ease-[ease] hover:pr-2.5 hover:text-text-primary ${
-            open ? 'pointer-events-none translate-x-full opacity-0' : 'translate-x-0 opacity-100'
-          }`}
-        >
-          <Bookmark className="size-4 flex-none text-accent" strokeWidth={2.4} />
-          <div className="text-[0.72rem] font-bold tracking-[0.12em] [writing-mode:vertical-rl]">자유공간</div>
-        </button>
-      ) : null}
+      {/*
+        책갈피 — 언제나 맨 앞(상세·팝업·서식 막대보다 위).
+        데스크톱은 펼치면 패널 왼쪽 가장자리에 붙어 따라가며 접기 손잡이가 된다.
+        모바일은 가는 탭, 패널이 화면을 다 덮을 땐 패널 머리의 접기 버튼을 쓴다.
+      */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-label={open ? '자유공간 접기 (M)' : '자유공간 펼치기 (M)'}
+        aria-expanded={open}
+        title="자유공간 (M)"
+        data-testid="scratch-tab"
+        style={{ right: open && !isMobile ? 'min(27rem, 92vw)' : 0 }}
+        className={`fixed z-[100] flex flex-col items-center rounded-l-xl border border-r-0 border-border-default bg-bg-surface text-text-secondary shadow-pop transition-[right,translate,opacity,padding,color] duration-500 ease-[ease] hover:text-text-primary ${
+          isMobile ? 'top-[45%] gap-1 px-1 py-2.5' : 'top-28 gap-1.5 px-1.5 py-3 hover:pr-2.5'
+        } ${open ? 'text-accent-ink' : ''} ${open && isMobile ? 'pointer-events-none translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}
+      >
+        <Bookmark className={`size-4 flex-none text-accent ${open ? 'fill-current' : ''}`} strokeWidth={2.4} />
+        {!isMobile ? <div className="text-[0.72rem] font-bold tracking-[0.12em] [writing-mode:vertical-rl]">자유공간</div> : null}
+      </button>
       {ready ? (
         <div
           role="complementary"
@@ -98,16 +101,5 @@ export default function ScratchPanel() {
         </div>
       ) : null}
     </Portal>
-  );
-}
-
-/** 모바일 상단 바용 책갈피 버튼 (가장자리 탭이 내용을 가리지 않게) */
-export function ScratchToggle() {
-  const open = useUiStore((s) => s.scratchOpen);
-  const setOpen = useUiStore((s) => s.setScratchOpen);
-  return (
-    <IconButton label="자유공간" active={open} onClick={() => setOpen(!open)} data-testid="scratch-toggle">
-      <Bookmark className="size-[18px] text-accent" strokeWidth={2.4} />
-    </IconButton>
   );
 }
