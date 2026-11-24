@@ -81,7 +81,7 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "public/icons/icon-512.png",
+      "icon": "build/icon.png",
       "target": [
         "dir",
         "dmg"

@@ -86,9 +86,13 @@ data/backups/             ← 하루 한 번 자동 백업, 최근 14개
 
 ## 로고·아이콘 바꾸기
 
-1. `public/logo.svg` 를 새 로고로 교체 (앱 안의 로고·파비콘은 이 파일을 쓴다)
-2. `pnpm icons` → `public/icons/` 의 PWA 아이콘 PNG 를 다시 만든다
-   (직접 만든 PNG 를 쓰려면 `icon-192.png`, `icon-512.png`, `maskable-512.png`(여백 12%), `apple-touch-icon.png`(180), `favicon-32.png` 를 같은 이름으로 덮어쓰면 된다)
+1. `build/icon-source.png` 를 새 그림으로 교체
+2. 그림에 테두리 바깥 여백이 있으면 `scripts/gen-icons.mjs` 의 `CROP`(잘라낼 정사각형)·`RADIUS`(모서리 반지름)를 맞춘다
+3. `pnpm icons` → 아래를 한 번에 다시 만든다
+   - `build/icon.png` — macOS 앱 아이콘 (1024, 애플 규격 여백·그림자)
+   - `public/logo.png` — 앱 안 로고·파비콘
+   - `public/icons/*` — PWA 아이콘 (maskable·apple-touch 포함)
+4. 앱에 반영: `pnpm app:dist` 후 `/Applications` 에 다시 복사
 
 ## 테스트
 

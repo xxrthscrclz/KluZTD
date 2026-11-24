@@ -19,7 +19,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['logo.svg', 'favicon.svg', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'],
+      includeAssets: ['logo.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'],
       manifest: {
         id: './',
         name: 'KluZTD',
