@@ -25,6 +25,3 @@ export const PRIORITY: Record<Priority, { id: Priority; label: string; short: st
 };
 
 export const PRIORITY_ORDER: Priority[] = ['high', 'normal', 'low'];
-
-/** 완료 칸에 처음 보여 줄 개수 */
-export const DONE_PAGE_SIZE = 20;

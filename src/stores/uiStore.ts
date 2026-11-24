@@ -7,9 +7,6 @@ type UiState = {
   boardFilter: TaskFilter;
   setBoardFilter: (patch: Partial<TaskFilter>) => void;
   resetBoardFilter: () => void;
-  /** 완료 칸 전체 보기 */
-  showAllDone: boolean;
-  setShowAllDone: (v: boolean) => void;
   /** 모바일 보드에서 보고 있는 칸 */
   mobileColumn: number;
   setMobileColumn: (i: number) => void;
@@ -24,8 +21,6 @@ export const useUiStore = create<UiState>()(
       boardFilter: EMPTY_FILTER,
       setBoardFilter: (patch) => set((s) => ({ boardFilter: { ...EMPTY_FILTER, ...s.boardFilter, ...patch } })),
       resetBoardFilter: () => set({ boardFilter: EMPTY_FILTER }),
-      showAllDone: false,
-      setShowAllDone: (showAllDone) => set({ showAllDone }),
       mobileColumn: 0,
       setMobileColumn: (mobileColumn) => set({ mobileColumn }),
       scratchOpen: false,
@@ -33,7 +28,7 @@ export const useUiStore = create<UiState>()(
     }),
     {
       name: 'kluztd:ui',
-      partialize: (s) => ({ boardFilter: { ...s.boardFilter, query: '' }, showAllDone: s.showAllDone, scratchOpen: s.scratchOpen }),
+      partialize: (s) => ({ boardFilter: { ...s.boardFilter, query: '' }, scratchOpen: s.scratchOpen }),
     },
   ),
 );

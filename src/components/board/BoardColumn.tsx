@@ -1,7 +1,8 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
+import { Archive, ChevronRight, Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import TaskCard from '@/components/board/TaskCard';
 import { StatusDot } from '@/components/ui/Badges';
@@ -20,18 +21,19 @@ type Props = {
   tasks: Task[];
   total: number;
   onOpen: (id: string) => void;
-  /** 완료 칸: 남은(숨겨진) 개수와 펼치기 */
-  hiddenCount?: number;
-  onShowMore?: () => void;
+  /** 완료 칸: 일주일 지나 아카이브로 넘어간 개수 */
+  archivedCount?: number;
   filtered: boolean;
   className?: string;
   /** 모바일: 위 탭에 이미 칸 이름이 있으니 머리글 대신 추가 버튼만 */
   bare?: boolean;
   issues: Map<string, IssueStat>;
+  /** 드래그 중인 카드가 이 칸으로 옮겨질 참 */
+  isTarget?: boolean;
 };
 
 
-export default function BoardColumn({ status, tasks, total, onOpen, hiddenCount = 0, onShowMore, filtered, className = '', bare = false, issues }: Props) {
+export default function BoardColumn({ status, tasks, total, onOpen, archivedCount = 0, filtered, className = '', bare = false, issues, isTarget = false }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: columnDropId(status), data: { type: 'column', status } });
   const addTask = useTaskStore((s) => s.addTask);
   const [adding, setAdding] = useState(false);
@@ -60,8 +62,9 @@ export default function BoardColumn({ status, tasks, total, onOpen, hiddenCount 
       role="region"
       aria-label={def.label}
       data-testid={`column-${status}`}
-      className={`flex min-h-0 min-w-0 flex-col rounded-2xl bg-bg-sunken transition-[box-shadow,background-color] ${
-        isOver ? `ring-2 ${statusTone[status].ring}` : ''
+      data-target={isTarget || undefined}
+      className={`relative flex min-h-0 min-w-0 flex-col rounded-2xl outline-2 -outline-offset-2 transition-[background-color,outline-color,box-shadow] ${
+        isTarget || isOver ? `${statusTone[status].soft} outline-dashed ${statusTone[status].outline}` : 'bg-bg-sunken outline-transparent'
       } ${className}`}
     >
       {bare ? (
@@ -77,8 +80,13 @@ export default function BoardColumn({ status, tasks, total, onOpen, hiddenCount 
         <div className="flex flex-none items-center gap-2 px-3 pt-3 pb-2">
           <StatusDot status={status} />
           <div className="text-[0.84rem] font-bold">{def.label}</div>
+          {isTarget ? (
+            <div className={`anim-pop rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${statusTone[status].text} bg-bg-surface`} data-testid="drop-target-label">
+              여기로 이동
+            </div>
+          ) : null}
           <div className="text-[0.8rem] font-semibold text-text-muted tabular-nums" data-testid="column-count">
-            {filtered && tasks.length + hiddenCount !== total ? `${tasks.length + hiddenCount}/${total}` : total}
+            {filtered && tasks.length !== total ? `${tasks.length}/${total}` : total}
           </div>
           <IconButton label={`${def.label}에 추가`} size="sm" className="ml-auto" onClick={startAdding}>
             <Plus className="size-4" />
@@ -121,14 +129,16 @@ export default function BoardColumn({ status, tasks, total, onOpen, hiddenCount 
           <EmptyState compact title={filtered ? '조건에 맞는 항목 없음' : '비어 있음'} description={filtered ? undefined : def.hint} />
         ) : null}
 
-        {hiddenCount > 0 ? (
-          <button
-            type="button"
-            onClick={onShowMore}
-            className="h-9 flex-none rounded-xl text-xs font-semibold text-text-muted hover:bg-bg-hover hover:text-text-primary"
+        {archivedCount > 0 ? (
+          <Link
+            to="/archive"
+            data-testid="archive-link"
+            className="flex h-9 flex-none items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-text-muted hover:bg-bg-hover hover:text-text-primary"
           >
-            {hiddenCount}개 더 보기
-          </button>
+            <Archive className="size-3.5" />
+            일주일 지난 {archivedCount}개는 아카이브에
+            <ChevronRight className="size-3.5" />
+          </Link>
         ) : null}
       </div>
     </div>

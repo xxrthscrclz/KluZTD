@@ -1,44 +1,45 @@
-import { DndContext, DragOverlay, MeasuringStrategy } from '@dnd-kit/core';
+import { DndContext, MeasuringStrategy } from '@dnd-kit/core';
+import OverlayPortal from '@/components/ui/OverlayPortal';
 import { DROP_ANIMATION } from '@/lib/motion';
 import { useMemo, useRef, type TouchEvent } from 'react';
 
 import BoardColumn from '@/components/board/BoardColumn';
 import MobileTab from '@/components/board/MobileTab';
 import { TaskCardBody } from '@/components/board/TaskCard';
-import { BOARD_COLUMNS, DONE_PAGE_SIZE } from '@/constants/status';
+import { BOARD_COLUMNS } from '@/constants/status';
 import { useDirection } from '@/hooks/useDirection';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useTaskParam } from '@/hooks/useTaskParam';
 import { useTaskStore } from '@/stores/taskStore';
 import { useUiStore } from '@/stores/uiStore';
 import type { BoardStatus, Task } from '@/types/task';
+import { isArchived } from '@/utils/archive';
 import { issueIndex, type IssueStat } from '@/utils/issues';
 import { isFilterActive, matchesFilter, tasksIn } from '@/utils/task';
 
 import { boardCollision, type Columns } from './dnd';
 import { useBoardDnd } from './useBoardDnd';
 
-/** 필터·완료 칸 접기를 적용한 칸별 카드 id */
+/** 필터를 적용한 칸별 카드 id — 완료한 지 일주일 지난 것은 아카이브로 빠진다 */
 function useVisibleColumns(tasks: Task[], issues: Map<string, IssueStat>) {
   const filter = useUiStore((s) => s.boardFilter);
-  const showAllDone = useUiStore((s) => s.showAllDone);
   return useMemo(() => {
     const now = new Date();
     const visible = {} as Columns;
     const totals = {} as Record<BoardStatus, number>;
-    let hiddenDone = 0;
+    let archived = 0;
     for (const s of BOARD_COLUMNS) {
-      const all = tasksIn(tasks, s);
-      totals[s] = all.length;
-      let ids = all.filter((task) => matchesFilter(task, filter, now, issues.get(task.id)?.text)).map((task) => task.id);
-      if (s === 'done' && !showAllDone && ids.length > DONE_PAGE_SIZE) {
-        hiddenDone = ids.length - DONE_PAGE_SIZE;
-        ids = ids.slice(0, DONE_PAGE_SIZE);
+      let all = tasksIn(tasks, s);
+      if (s === 'done') {
+        const recent = all.filter((task) => !isArchived(task, now));
+        archived = all.length - recent.length;
+        all = recent;
       }
-      visible[s] = ids;
+      totals[s] = all.length;
+      visible[s] = all.filter((task) => matchesFilter(task, filter, now, issues.get(task.id)?.text)).map((task) => task.id);
     }
-    return { visible, totals, hiddenDone, filtered: isFilterActive(filter) };
-  }, [tasks, filter, showAllDone, issues]);
+    return { visible, totals, archived, filtered: isFilterActive(filter) };
+  }, [tasks, filter, issues]);
 }
 
 /** 모바일: 좌우로 밀어서 칸 전환 */
@@ -64,14 +65,13 @@ export default function Board() {
   const tasks = useTaskStore((s) => s.tasks);
   const days = useTaskStore((s) => s.days);
   const issues = useMemo(() => issueIndex(days), [days]);
-  const setShowAllDone = useUiStore((s) => s.setShowAllDone);
   const mobileColumn = useUiStore((s) => s.mobileColumn);
   const setMobileColumn = useUiStore((s) => s.setMobileColumn);
   const isMobile = useIsMobile();
   const { open } = useTaskParam();
 
   const byId = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
-  const { visible, totals, hiddenDone, filtered } = useVisibleColumns(tasks, issues);
+  const { visible, totals, archived, filtered } = useVisibleColumns(tasks, issues);
   const dnd = useBoardDnd(visible, byId);
 
   const mobileStatus = BOARD_COLUMNS[Math.min(mobileColumn, BOARD_COLUMNS.length - 1)];
@@ -87,9 +87,9 @@ export default function Board() {
     total: totals[status],
     onOpen: (id: string) => open(id),
     filtered,
-    hiddenCount: status === 'done' && !dnd.dragging ? hiddenDone : 0,
-    onShowMore: () => setShowAllDone(true),
+    archivedCount: status === 'done' && !dnd.dragging ? archived : 0,
     issues,
+    isTarget: Boolean(dnd.activeTask && dnd.columns[status].includes(dnd.activeTask.id) && dnd.activeTask.status !== status),
   });
 
   return (
@@ -132,13 +132,9 @@ export default function Board() {
         </div>
       )}
 
-      <DragOverlay dropAnimation={DROP_ANIMATION}>
-        {dnd.activeTask ? (
-          <div className="w-[min(20rem,calc(100vw-2rem))]">
-            <TaskCardBody task={dnd.activeTask} overlay issueStat={issues.get(dnd.activeTask.id)} />
-          </div>
-        ) : null}
-      </DragOverlay>
+      <OverlayPortal dropAnimation={DROP_ANIMATION}>
+        {dnd.activeTask ? <TaskCardBody task={dnd.activeTask} overlay issueStat={issues.get(dnd.activeTask.id)} /> : null}
+      </OverlayPortal>
     </DndContext>
   );
 }
