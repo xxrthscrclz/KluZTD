@@ -1,8 +1,10 @@
 /**
  * build/icon-source.png → 앱 아이콘·로고 PNG 전부.  `pnpm icons`
  *
- * 원본 그림은 둥근 사각 테두리 바깥에도 배경이 있어서, 테두리 바깥선(CROP)에 맞춰 잘라 내고
- * 모서리를 테두리 곡률(RADIUS)대로 둥글게 깎는다. 그림을 바꾸면 CROP·RADIUS 만 다시 맞추면 된다.
+ * 원본 그림에는 둥근 테두리와 그 바깥 배경이 그려져 있는데, 그 테두리는 macOS 아이콘 모양과 곡률이 달라
+ * 그대로 쓰면 어긋나 보인다. 그래서 테두리 안쪽(CROP)의 그림만 잘라 애플 아이콘 모양(모서리 22.5%)으로 깎고,
+ * 원본과 같은 색(왼쪽 파랑 → 오른쪽 금색)의 테두리를 그 모양 그대로 다시 그린다 (FRAME).
+ * 그림을 바꾸면 CROP 만 다시 맞추면 된다 (테두리 안쪽 선보다 살짝 안으로).
  *
  * 만드는 것
  *   build/icon.png                 macOS 앱 아이콘 (1024, 애플 규격 여백 + 그림자) — electron-builder 가 씀
@@ -18,10 +20,16 @@ import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
 const SOURCE = path.join(root, 'build/icon-source.png');
 
-/** 원본(2048²)에서 테두리 바깥선 기준 정사각형 — 바깥 빛번짐이 안 들어가게 몇 px 안쪽 */
-const CROP = { x: 300, y: 292, size: 1448 };
-/** 테두리 모서리 반지름 (원본 px) */
-const RADIUS = 268;
+/** 원본(2048²)에서 테두리 안쪽 정사각형 — 테두리 빛번짐이 안 들어가게 10px 더 안쪽 */
+const CROP = { x: 372, y: 352, size: 1304 };
+/** macOS(Big Sur 이후) 아이콘 모서리 반지름 — 폭 대비 */
+const CORNER = 0.225;
+/** 다시 그리는 테두리 — 두께는 아이콘 폭 대비, 색은 원본 테두리에서 따옴 (왼쪽 → 오른쪽) */
+const FRAME = {
+  width: 0.04,
+  band: ['#1f6fe0', '#3a8cf0', '#8f9fd8', '#c9a57a', '#a8865e'],
+  line: ['#7fd4ff', '#a9d8ff', '#e6dcf0', '#ffe3b0', '#f2cf95'],
+};
 /** 테두리 바깥 배경색 (maskable 여백 등) */
 const NAVY = '#0a1a4f';
 
@@ -44,7 +52,7 @@ const page = await browser.newPage();
 
 for (const t of targets) {
   const dataUrl = await page.evaluate(
-    async ({ src, t, CROP, RADIUS }) => {
+    async ({ src, t, CROP, CORNER, FRAME }) => {
       const img = new Image();
       img.src = src;
       await img.decode();
@@ -57,10 +65,11 @@ for (const t of targets) {
         g.fillRect(0, 0, t.size, t.size);
       }
       const off = (t.size - t.inner) / 2;
-      const r = (RADIUS / CROP.size) * t.inner;
-      const shape = () => {
+      // 애플 아이콘 비율: 모서리 반지름 = 폭의 22.5%. 안쪽으로 줄여도 가장자리와 같은 간격을 유지한다
+      const R = t.inner * CORNER;
+      const shape = (inset = 0) => {
         g.beginPath();
-        g.roundRect(off, off, t.inner, t.inner, r);
+        g.roundRect(off + inset, off + inset, t.inner - inset * 2, t.inner - inset * 2, Math.max(0, R - inset));
       };
       if (t.shadow) {
         g.save();
@@ -78,10 +87,38 @@ for (const t of targets) {
         g.clip();
       }
       g.drawImage(img, CROP.x, CROP.y, CROP.size, CROP.size, off, off, t.inner, t.inner);
+      if (!t.square) {
+        // 테두리: 가장자리 띠 + 안쪽의 밝은 선 + 그림 쪽으로 번지는 은은한 빛 (클립 안이라 모양 밖으로 안 나감)
+        const grad = (stops, alpha = 1) => {
+          const lg = g.createLinearGradient(off, off, off + t.inner, off + t.inner * 0.35);
+          stops.forEach((c, i) => lg.addColorStop(i / (stops.length - 1), c));
+          g.globalAlpha = alpha;
+          return lg;
+        };
+        const w = t.inner * FRAME.width;
+        g.save();
+        g.shadowColor = 'rgba(90, 170, 255, 0.55)';
+        g.shadowBlur = w * 0.9;
+        shape(w * 0.5);
+        g.lineWidth = w;
+        g.strokeStyle = grad(FRAME.band, 0.95);
+        g.stroke();
+        g.restore();
+        shape(w * 0.55);
+        g.lineWidth = Math.max(1, w * 0.16);
+        g.strokeStyle = grad(FRAME.line, 0.95);
+        g.stroke();
+        // 바깥 가장자리를 살짝 어둡게 — 배경이 밝아도 윤곽이 보이게
+        shape(Math.max(0.5, w * 0.04));
+        g.lineWidth = Math.max(1, w * 0.08);
+        g.strokeStyle = 'rgba(10, 20, 60, 0.6)';
+        g.globalAlpha = 1;
+        g.stroke();
+      }
       g.restore();
       return c.toDataURL('image/png');
     },
-    { src, t, CROP, RADIUS },
+    { src, t, CROP, CORNER, FRAME },
   );
   const out = path.join(root, t.file);
   fs.mkdirSync(path.dirname(out), { recursive: true });

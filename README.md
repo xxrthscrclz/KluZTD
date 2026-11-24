@@ -87,7 +87,7 @@ data/backups/             ← 하루 한 번 자동 백업, 최근 14개
 ## 로고·아이콘 바꾸기
 
 1. `build/icon-source.png` 를 새 그림으로 교체
-2. 그림에 테두리 바깥 여백이 있으면 `scripts/gen-icons.mjs` 의 `CROP`(잘라낼 정사각형)·`RADIUS`(모서리 반지름)를 맞춘다
+2. `scripts/gen-icons.mjs` 의 `CROP`(쓸 정사각형 영역)을 그림에 맞춘다 — 그림에 테두리가 그려져 있으면 그 안쪽만. 모양은 애플 아이콘 비율(모서리 22.5%)로 깎고 테두리를 그 모양대로 다시 그린다
 3. `pnpm icons` → 아래를 한 번에 다시 만든다
    - `build/icon.png` — macOS 앱 아이콘 (1024, 애플 규격 여백·그림자)
    - `public/logo.png` — 앱 안 로고·파비콘
