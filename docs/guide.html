@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KluZTD 사용 가이드</title>
+<meta name="description" content="KluZTD 설치부터 화면별 사용법, 데이터 관리, 문제 해결까지">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --sunken: #eeece7; --border: #e3e0d9; --border-strong: #cfcbc2;
+    --text: #1d1d1b; --text-2: #4a4945; --muted: #85837c;
+    --accent: #5f78ff; --accent-soft: #eef1ff; --done: #2f9e6a; --done-soft: #e7f6ee;
+    --warn: #c7771a; --warn-soft: #fdf3e4; --danger: #d4483b; --danger-soft: #fdecea;
+    --code-bg: #f1efea; --shadow: 0 1px 2px rgba(20,20,18,.04), 0 4px 16px rgba(20,20,18,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413; --surface: #1d1d1b; --sunken: #191918; --border: #2c2c29; --border-strong: #3b3b37;
+      --text: #eceae4; --text-2: #bdbab2; --muted: #8a877f;
+      --accent: #8193ff; --accent-soft: #232845; --done: #4fc58a; --done-soft: #1a2e24;
+      --warn: #e5a04a; --warn-soft: #2f2516; --danger: #ef7468; --danger-soft: #331d1b;
+      --code-bg: #242422; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 15.5px; line-height: 1.7; letter-spacing: -0.01em; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, kbd, pre { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: .86em; }
+  code { background: var(--code-bg); padding: .12em .4em; border-radius: 6px; }
+  kbd {
+    display: inline-block; min-width: 1.7em; text-align: center; padding: .05em .45em; border-radius: 6px;
+    background: var(--surface); border: 1px solid var(--border-strong); border-bottom-width: 2px; font-weight: 600;
+  }
+  pre {
+    margin: 12px 0; padding: 14px 16px; overflow-x: auto; border-radius: 12px;
+    background: var(--code-bg); border: 1px solid var(--border); line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; font-size: .84rem; }
+  pre .c { color: var(--muted); }
+
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; max-width: 1120px; margin: 0 auto; padding: 40px 24px 96px; }
+  nav.toc { position: sticky; top: 32px; align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; margin-bottom: 20px; }
+  .brand svg { width: 30px; height: 30px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; }
+  nav.toc li a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text-2); font-size: .9rem; }
+  nav.toc li a:hover { background: var(--sunken); color: var(--text); text-decoration: none; }
+  nav.toc li li a { padding-left: 22px; font-size: .84rem; color: var(--muted); }
+
+  main { min-width: 0; }
+  .hero { padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .hero h1 { font-size: 2.1rem; letter-spacing: -0.035em; line-height: 1.25; margin: 0 0 10px; }
+  .hero p { margin: 0; color: var(--text-2); font-size: 1.05rem; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .pill { font-size: .8rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--text-2); }
+
+  section { padding-top: 36px; }
+  h2 { font-size: 1.45rem; letter-spacing: -0.03em; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  h2 .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: .85rem; }
+  h3 { font-size: 1.08rem; margin: 26px 0 8px; letter-spacing: -0.02em; }
+  p { margin: 8px 0; }
+  ul, ol { padding-left: 1.3em; margin: 8px 0; }
+  li { margin: 3px 0; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); margin: 14px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 14px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { margin: 0 0 6px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card p, .card ul { margin: 4px 0; color: var(--text-2); font-size: .93rem; }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps > li { counter-increment: step; position: relative; padding-left: 42px; margin: 18px 0; }
+  .steps > li::before {
+    content: counter(step); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; font-size: .82rem; font-weight: 700; background: var(--text); color: var(--bg);
+  }
+  .steps > li > strong:first-child { display: block; }
+
+  .note { border-radius: 12px; padding: 12px 16px; margin: 14px 0; font-size: .93rem; border: 1px solid; }
+  .note strong { display: block; margin-bottom: 2px; }
+  .note.info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+  .note.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .note.ok { background: var(--done-soft); border-color: color-mix(in srgb, var(--done) 30%, transparent); }
+  .note.danger { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .92rem; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--sunken); font-weight: 700; font-size: .84rem; color: var(--text-2); }
+  tr:last-child td { border-bottom: 0; }
+  .tablewrap { overflow-x: auto; }
+
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+  .flow .box { padding: 8px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; font-size: .9rem; }
+  .flow .box.todo { border-color: var(--border-strong); }
+  .flow .box.doing { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .flow .box.done { color: var(--done); border-color: color-mix(in srgb, var(--done) 40%, transparent); }
+  .flow .box.arch { color: var(--muted); border-style: dashed; }
+  .flow .arrow { color: var(--muted); font-size: .85rem; }
+
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; padding: 24px 16px 72px; }
+    nav.toc { position: static; max-height: none; margin-bottom: 8px; }
+    nav.toc ol ol { display: none; }
+    nav.toc > ol { display: flex; flex-wrap: wrap; gap: 4px; }
+    .hero h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc" aria-label="목차">
+    <div class="brand">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1d1d1b"/><rect x="112" y="128" width="76" height="168" rx="22" fill="#5b6b86"/><rect x="218" y="128" width="76" height="256" rx="22" fill="#5f78ff"/><rect x="324" y="128" width="76" height="120" rx="22" fill="#3fbf80"/><path d="M338 330l24 24 46-50" fill="none" stroke="#f6f5f2" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      KluZTD
+    </div>
+    <ol>
+      <li><a href="#start">시작하기</a>
+        <ol>
+          <li><a href="#need">준비물</a></li>
+          <li><a href="#app">맥 앱으로 설치</a></li>
+          <li><a href="#web">브라우저로 쓰기</a></li>
+          <li><a href="#phone">휴대폰에서 쓰기</a></li>
+        </ol>
+      </li>
+      <li><a href="#concept">핵심 개념</a></li>
+      <li><a href="#screens">화면별 사용법</a>
+        <ol>
+          <li><a href="#daily">일일 관리</a></li>
+          <li><a href="#status">상태 관리</a></li>
+          <li><a href="#archive">아카이브</a></li>
+          <li><a href="#calendar">달력</a></li>
+          <li><a href="#projects">프로젝트</a></li>
+          <li><a href="#notebook">수첩 · 자유공간</a></li>
+        </ol>
+      </li>
+      <li><a href="#editor">메모 에디터</a></li>
+      <li><a href="#keys">단축키</a></li>
+      <li><a href="#data">데이터 · 백업</a></li>
+      <li><a href="#update">업데이트</a></li>
+      <li><a href="#trouble">문제 해결</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <h1>KluZTD 사용 가이드</h1>
+      <p>다 적고, 분류하고, 보드에서 진행하고, 기록하는 나만의 할 일 관리. 설치부터 매일 쓰는 법까지 한 페이지에 정리했어요.</p>
+      <div class="pills">
+        <div class="pill">로컬 전용 — 데이터는 내 컴퓨터에만</div>
+        <div class="pill">macOS 앱 · 브라우저 · 휴대폰(같은 와이파이)</div>
+        <div class="pill">라이트 / 다크</div>
+      </div>
+    </div>
+
+    <!-- 1. 시작하기 -->
+    <section id="start">
+      <h2><span class="num">1</span>시작하기</h2>
+      <p>KluZTD 는 서버나 계정이 없습니다. 저장소를 받아 내 컴퓨터에서 빌드해서 씁니다. 처음 한 번만 아래 순서대로 하면 됩니다.</p>
+
+      <h3 id="need">준비물</h3>
+      <div class="tablewrap"><table>
+        <tr><th>필요한 것</th><th>확인 방법</th><th>없으면</th></tr>
+        <tr><td>macOS (앱으로 쓸 때)</td><td>—</td><td>Windows/Linux 는 <a href="#web">브라우저로 쓰기</a></td></tr>
+        <tr><td>Node.js 22 이상</td><td><code>node -v</code></td><td><a href="https://nodejs.org/">nodejs.org</a> 에서 LTS 설치, 또는 <code>brew install node</code></td></tr>
+        <tr><td>pnpm</td><td><code>pnpm -v</code></td><td><code>npm install -g pnpm</code> 또는 <code>corepack enable</code></td></tr>
+        <tr><td>git</td><td><code>git --version</code></td><td>맥은 처음 실행할 때 설치 안내가 뜹니다</td></tr>
+      </table></div>
+
+      <h3 id="app">맥 앱으로 설치 (추천)</h3>
+      <ol class="steps">
+        <li><strong>저장소 받기</strong>
+<pre><code>git clone https://github.com/xxrthscrclz/KluZTD.git
+cd KluZTD</code></pre></li>
+        <li><strong>의존성 설치</strong> — Electron 본체도 이때 함께 내려받습니다 (1~3분).
+<pre><code>pnpm install</code></pre></li>
+        <li><strong>앱 빌드</strong> — <code>release/</code> 폴더에 <code>KluZTD.app</code> 이 생깁니다.
+<pre><code>pnpm app:dist</code></pre></li>
+        <li><strong>응용 프로그램 폴더로 옮기기</strong>
+<pre><code><span class="c"># Apple Silicon 은 mac-arm64, Intel 맥은 mac 폴더</span>
+ditto release/mac*/KluZTD.app /Applications/KluZTD.app</code></pre>
+          이제 Launchpad · Spotlight 에서 <b>KluZTD</b> 로 실행합니다. Dock 에 두려면 실행 중인 아이콘 우클릭 → 옵션 → Dock 에 유지.</li>
+      </ol>
+      <div class="note info"><strong>설치 파일(DMG)로 나눠 주고 싶다면</strong><code>pnpm app:dmg</code> → <code>release/KluZTD-버전-arm64.dmg</code>. 서명하지 않은 앱이라 받은 사람은 처음 한 번 <b>우클릭 → 열기</b> 로 열어야 합니다 (아래 <a href="#trouble">문제 해결</a> 참고).</div>
+
+      <h3 id="web">브라우저로 쓰기</h3>
+      <p>앱을 만들지 않고 바로 쓰거나, 맥이 아닌 경우입니다.</p>
+<pre><code>pnpm install
+pnpm dev          <span class="c"># http://localhost:5173 — 코드 고치면 바로 반영</span></code></pre>
+      <p>맥에서는 폴더 안의 <code>KluZTD.command</code> 를 더블클릭해도 됩니다 — 빌드 후 <code>http://localhost:4273</code> 이 열리고, 주소창의 설치 버튼으로 PWA 처럼 설치할 수 있어요. 이 방식은 터미널 창이 켜져 있는 동안만 동작합니다.</p>
+
+      <h3 id="phone">휴대폰에서 쓰기</h3>
+<pre><code>pnpm dev:lan      <span class="c"># 같은 와이파이의 휴대폰에서 http://&lt;맥 IP&gt;:5173</span></code></pre>
+      <div class="note warn"><strong>집 · 개인 네트워크에서만</strong>데이터 API 가 네트워크에 열립니다. 카페·회사 공용 와이파이에서는 쓰지 마세요. 휴대폰 홈 화면 설치·오프라인 캐시는 HTTPS 에서만 되므로 LAN 에서는 웹으로만 쓰입니다.</div>
+    </section>
+
+    <!-- 2. 핵심 개념 -->
+    <section id="concept">
+      <h2><span class="num">2</span>핵심 개념</h2>
+      <p><b>체크리스트 한 줄 = 상태 관리 카드 하나 = 같은 할 일.</b> 일일 관리에서 적든, 보드에서 만들든, 달력에서 추가하든 모두 같은 할 일이고, 어디서 바꾸든 모든 화면에 반영됩니다.</p>
+      <div class="flow">
+        <div class="box todo">진행 예정</div><div class="arrow">→</div>
+        <div class="box doing">진행 중</div><div class="arrow">→</div>
+        <div class="box done">진행 완료</div><div class="arrow">— 7일 뒤 →</div>
+        <div class="box arch">아카이브</div>
+      </div>
+      <ul>
+        <li><b>대기</b> — 남에게 넘겼거나 막혀 있는 일. 담당자를 적어 두면 누구 손에 있는지 보입니다.</li>
+        <li><b>이슈</b> — 그날 생긴 문제·메모. 할 일에 연결하면 그 할 일의 상세·카드·프로젝트 어디서나 같은 이슈로 보여요.</li>
+        <li><b>프로젝트</b> — 할 일을 묶는 상위 단위. 프로젝트별로 다음에 할 일(Next Action)과 한 일 기록이 쌓입니다.</li>
+      </ul>
+    </section>
+
+    <!-- 3. 화면별 -->
+    <section id="screens">
+      <h2><span class="num">3</span>화면별 사용법</h2>
+      <p>왼쪽 메뉴(휴대폰은 아래 메뉴) 또는 숫자키 <kbd>1</kbd>–<kbd>5</kbd> 로 이동합니다.</p>
+
+      <h3 id="daily">일일 관리 <kbd>1</kbd></h3>
+      <ul>
+        <li>오늘 할 일을 적으면 상태 관리 «진행 예정» 에도 생기고, 체크하면 «진행 완료» 가 됩니다.</li>
+        <li>줄의 <b>ⓘ</b> 를 누르면 마감 · 담당자 · 프로젝트 · 우선순위 · 이슈 기록 · 미루기 · 빼기 · 삭제를 할 수 있어요. 정보가 있으면 ⓘ 에 점이, 마감이 지났으면 빨간 점이 찍힙니다.</li>
+        <li><b>못 끝낸 일은 날이 바뀌면 자동으로 오늘 체크리스트로</b> 넘어옵니다. 끝낸 일은 그날에 남아요.</li>
+        <li>오른쪽의 <b>빨간 알림</b> — 마감이 3일 안(또는 지남)인데 체크리스트에 없는 일. «오늘에 넣기» 로 바로 올립니다.</li>
+        <li>아래쪽은 그날의 <b>이슈</b> 칸입니다.</li>
+      </ul>
+
+      <h3 id="status">상태 관리 <kbd>2</kbd></h3>
+      <ul>
+        <li>칸반 보드 — 진행 예정 · 진행 중 · 진행 완료 · 대기. 카드를 끌어다 놓아 상태를 바꿉니다.</li>
+        <li><b>진행 중으로 옮기면 오늘 체크리스트에 자동으로</b> 올라갑니다.</li>
+        <li>위쪽 요약 타일(진행 중 · 마감 지남 · 오늘 마감 …)을 누르면 그 조건으로 걸러 봅니다. 검색은 <kbd>/</kbd>.</li>
+        <li>각 칸의 <b>＋</b> 로 그 칸 맨 위에 바로 추가합니다.</li>
+        <li>카드를 누르거나 <kbd>Enter</kbd> 로 상세를 엽니다. 키보드로는 <kbd>Space</kbd> 로 집어서 화살표로 옮길 수 있어요.</li>
+      </ul>
+
+      <h3 id="archive">아카이브</h3>
+      <div class="card">
+        <h4>완료한 지 7일이 지나면 자동으로 정리됩니다</h4>
+        <p>진행 완료 칸에는 <b>최근 일주일 안에 끝낸 일만</b> 보입니다. 그보다 오래된 일은 지워지는 게 아니라 아카이브로 넘어가요.</p>
+        <ul>
+          <li>들어가는 길: 진행 완료 칸 아래 «일주일 지난 N개는 아카이브에 →», 또는 상태 관리 오른쪽 위 <b>아카이브</b> 버튼</li>
+          <li>최근에 끝낸 것부터 <b>월별</b>로 묶여 있고, 제목 · 메모 · 이슈로 검색할 수 있어요.</li>
+          <li>줄을 누르면 상세가 열리고, 오른쪽 <b>↺</b> 를 누르면 «진행 예정» 으로 다시 꺼냅니다.</li>
+        </ul>
+      </div>
+
+      <h3 id="calendar">달력 <kbd>3</kbd></h3>
+      <ul>
+        <li>한 달 전체 — 날짜마다 체크리스트 진행(예: 1/3), 그날 마감(점선), 미해결 이슈, 그날 완료한 일이 보입니다.</li>
+        <li>날짜를 골라 할 일을 추가하면 그날 체크리스트 + 상태 관리에 함께 생깁니다. 일정을 끌어서 다른 날로 옮길 수 있어요.</li>
+      </ul>
+
+      <h3 id="projects">프로젝트 <kbd>4</kbd></h3>
+      <ul>
+        <li><b>Next Action</b> — 손잡이로 끌어서 순서를 정합니다. 순서를 안 정한 일은 그 아래 마감일 가까운 순.</li>
+        <li><b>한 일</b> — 완료 · 시작 · 이슈가 시간순 타임라인으로 쌓입니다.</li>
+        <li>새 프로젝트는 할 일 상세의 «프로젝트» 칸에 이름을 적고 <kbd>Enter</kbd>.</li>
+      </ul>
+
+      <h3 id="notebook">수첩 <kbd>5</kbd> · 자유공간 <kbd>M</kbd></h3>
+      <div class="grid">
+        <div class="card">
+          <h4>수첩</h4>
+          <p>여러 장의 페이지를 자유롭게 씁니다. 목록은 최근에 고친 순이고 제목 · 본문 검색이 돼요. 쓰는 대로 자동 저장.</p>
+        </div>
+        <div class="card">
+          <h4>자유공간</h4>
+          <p>어느 화면에서나 오른쪽 가장자리의 <b>책갈피</b>. 잠깐 적어 둘 것, 전화 메모 등. 상세가 열려 있어도 열 수 있어요.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 에디터 -->
+    <section id="editor">
+      <h2><span class="num">4</span>메모 에디터</h2>
+      <p>메모 · 이슈 · 수첩 · 자유공간은 노션처럼 씁니다.</p>
+      <div class="tablewrap"><table>
+        <tr><th>입력</th><th>결과</th></tr>
+        <tr><td><code>#</code> <code>##</code> <code>###</code> + 띄어쓰기</td><td>제목 1~3</td></tr>
+        <tr><td><code>-</code> / <code>1.</code> / <code>[ ]</code></td><td>목록 / 번호 목록 / 체크리스트</td></tr>
+        <tr><td><code>&gt;</code> · <code>!&gt;</code> · <code>---</code></td><td>인용 · 콜아웃 · 구분선</td></tr>
+        <tr><td><code>```</code></td><td>코드 블록 (언어 선택 · 복사)</td></tr>
+        <tr><td><code>**굵게**</code> <code>`코드`</code> <code>==형광펜==</code></td><td>글자 서식</td></tr>
+        <tr><td><code>/</code></td><td>블록 메뉴 — 표 · 코드 · 콜아웃 · 수식 … 초성 검색 가능 (<code>/ㅍ</code> → 표)</td></tr>
+        <tr><td><code>$$x^2$$</code> · <code>$$$x^2$$$</code></td><td>문장 안 수식 · 수식 블록 (KaTeX)</td></tr>
+        <tr><td><code>-&gt;</code> <code>&lt;-</code> <code>&lt;-&gt;</code> <code>=&gt;</code></td><td>→ ← ↔ ⇒ (모든 입력칸에서)</td></tr>
+      </table></div>
+      <p>글자를 고르면 서식 막대가 뜨고, 쓰는 동안 화면 아래에도 서식 막대가 떠 있습니다(끌어서 옮기기 · 접기 가능).</p>
+    </section>
+
+    <!-- 5. 단축키 -->
+    <section id="keys">
+      <h2><span class="num">5</span>단축키</h2>
+      <div class="tablewrap"><table>
+        <tr><th>키</th><th>동작</th></tr>
+        <tr><td><kbd>N</kbd></td><td>할 일 추가</td></tr>
+        <tr><td><kbd>1</kbd>–<kbd>5</kbd></td><td>일일 관리 · 상태 관리 · 달력 · 프로젝트 · 수첩</td></tr>
+        <tr><td><kbd>M</kbd></td><td>자유공간 열기/닫기</td></tr>
+        <tr><td><kbd>/</kbd></td><td>상태 관리 검색</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>닫기</td></tr>
+        <tr><td>카드에서 <kbd>Enter</kbd> / <kbd>Space</kbd></td><td>상세 열기 / 집어서 화살표로 옮기기</td></tr>
+        <tr><td><kbd>⌘</kbd> <kbd>B</kbd></td><td>굵게</td></tr>
+        <tr><td><kbd>⌘</kbd> <kbd>+</kbd> / <kbd>⌘</kbd> <kbd>-</kbd> / <kbd>⌘</kbd> <kbd>0</kbd></td><td>앱 화면 확대 / 축소 / 원래대로</td></tr>
+      </table></div>
+      <p>한글 입력 상태에서도 동작합니다.</p>
+    </section>
+
+    <!-- 6. 데이터 -->
+    <section id="data">
+      <h2><span class="num">6</span>데이터 · 백업</h2>
+      <p>모든 데이터는 <b>JSON 파일 하나</b>에 저장되고, 인터넷으로 나가지 않습니다. 바뀌면 0.6초 뒤 자동 저장 — 왼쪽 아래 점이 <span style="color:var(--done);font-weight:700">초록</span>이면 저장됨, <span style="color:var(--warn);font-weight:700">주황</span>이면 아직 이 기기에만 보관 중입니다.</p>
+      <div class="tablewrap"><table>
+        <tr><th>어떻게 쓰나</th><th>데이터 파일</th></tr>
+        <tr><td>맥 앱</td><td><code>~/Library/Application Support/KluZTD/kluztd.json</code><br><span style="color:var(--muted)">앱 메뉴 <b>데이터 → 데이터 폴더 열기</b></span></td></tr>
+        <tr><td>브라우저 (<code>pnpm dev</code>, <code>KluZTD.command</code>)</td><td>저장소 폴더의 <code>data/kluztd.json</code></td></tr>
+      </table></div>
+      <div class="note warn"><strong>앱과 브라우저는 서로 다른 파일을 씁니다</strong>한쪽에서 적은 게 다른 쪽에 안 보이면 이 때문입니다. 하나만 정해서 쓰거나, 아래처럼 파일을 옮기세요.</div>
+      <ul>
+        <li><b>자동 백업</b> — 같은 폴더의 <code>backups/</code> 에 하루 한 번, 최근 14개를 남깁니다.</li>
+        <li><b>브라우저 → 앱으로 옮기기</b> (앱을 끈 상태에서):
+<pre><code>cp data/kluztd.json ~/Library/Application\ Support/KluZTD/kluztd.json</code></pre></li>
+        <li><b>다른 맥으로 이사</b> — 위 <code>kluztd.json</code> 하나만 복사하면 됩니다.</li>
+        <li><b>되살리기</b> — 앱을 끄고 <code>backups/kluztd-날짜.json</code> 을 <code>kluztd.json</code> 으로 덮어쓰기.</li>
+        <li>삭제는 확인 창 없이 바로 되고, 몇 초간 «되돌리기» 가 뜹니다.</li>
+      </ul>
+      <div class="note danger"><strong>데이터 파일은 git 에 올라가지 않습니다</strong><code>data/</code> 는 <code>.gitignore</code> 에 들어 있어요. 저장소를 지우거나 다시 받아도 앱 데이터(<code>~/Library/…</code>)는 그대로지만, 브라우저용 <code>data/kluztd.json</code> 은 함께 지워지니 주의하세요.</div>
+    </section>
+
+    <!-- 7. 업데이트 -->
+    <section id="update">
+      <h2><span class="num">7</span>업데이트</h2>
+      <p>새 버전이 올라오면 앱을 끄고:</p>
+<pre><code>cd KluZTD
+git pull
+pnpm install
+pnpm app:dist
+ditto release/mac*/KluZTD.app /Applications/KluZTD.app</code></pre>
+      <p>데이터는 앱 밖(<code>~/Library/Application Support/KluZTD</code>)에 있어서 앱을 덮어써도 그대로입니다.</p>
+    </section>
+
+    <!-- 8. 문제 해결 -->
+    <section id="trouble">
+      <h2><span class="num">8</span>문제 해결</h2>
+      <div class="tablewrap"><table>
+        <tr><th>증상</th><th>해결</th></tr>
+        <tr><td>«확인되지 않은 개발자» / «손상되었기 때문에 열 수 없습니다»</td><td>서명하지 않은 앱이라 그렇습니다. Finder 에서 앱 <b>우클릭 → 열기 → 열기</b>. 그래도 안 되면<br><code>xattr -dr com.apple.quarantine /Applications/KluZTD.app</code></td></tr>
+        <tr><td>«로컬 서버를 열지 못했습니다 (포트 47321)»</td><td>앱이 이미 켜져 있거나 다른 프로그램이 그 포트를 씁니다. 앱을 완전히 종료(<kbd>⌘</kbd> <kbd>Q</kbd>) 후 다시 실행. 확인: <code>lsof -i :47321</code></td></tr>
+        <tr><td><code>pnpm install</code> 후 «Electron failed to install correctly»</td><td><code>node node_modules/electron/install.js</code> 를 한 번 실행</td></tr>
+        <tr><td>할 일이 하나도 안 보임</td><td>앱과 브라우저는 데이터 파일이 다릅니다 → <a href="#data">데이터 · 백업</a></td></tr>
+        <tr><td>오래된 완료 항목이 안 보임</td><td>정상입니다. 7일 지난 완료 항목은 <a href="#archive">아카이브</a>에 있어요.</td></tr>
+        <tr><td>저장 점이 계속 주황</td><td>브라우저 모드에서 <code>pnpm dev</code> 터미널이 꺼졌는지 확인. 다시 켜면 자동으로 합쳐 저장합니다.</td></tr>
+      </table></div>
+    </section>
+
+    <footer>
+      KluZTD · 소스 <a href="https://github.com/xxrthscrclz/KluZTD">github.com/xxrthscrclz/KluZTD</a> · 개발 관련은 저장소의 <code>README.md</code>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
